@@ -9,9 +9,9 @@ function App(): React.JSX.Element {
   const [mode, setMode] = useState<Mode>('convert')
 
   return (
-    <div id="app-shell">
+    <div id="app-shell" className="flex h-full">
       <Sidebar active={mode} onSelect={setMode} />
-      <main className="content">
+      <main className="flex-1 overflow-y-auto px-10 py-8">
         {mode === 'convert' && <ConvertScreen />}
         {mode === 'vectorize' && <VectorizeScreen />}
         {mode === 'enhance' && <EnhanceScreen />}
