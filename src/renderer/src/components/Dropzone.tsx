@@ -31,7 +31,7 @@ function Dropzone(): React.JSX.Element {
                 title={`Quitar ${file.name}`}
                 aria-label={`Quitar ${file.name}`}
                 onClick={() => removeFile(file.path)}
-                className="cursor-pointer text-text-secondary hover:text-vectorize"
+                className="cursor-pointer text-text-secondary hover:text-vectorize focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 ×
               </button>

@@ -29,4 +29,10 @@ describe('Button', () => {
 
     expect(screen.getByRole('button', { name: 'Convertir' })).toBeDisabled()
   })
+
+  it('shows a visible focus outline for keyboard navigation', () => {
+    render(<Button>Convertir</Button>)
+
+    expect(screen.getByRole('button', { name: 'Convertir' })).toHaveClass('focus-visible:outline-2')
+  })
 })

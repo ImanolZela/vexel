@@ -23,7 +23,7 @@ function Button({
     <button
       type={type}
       data-active={active}
-      className={`cursor-pointer transition-colors ${VARIANT_CLASSES[variant]} ${className}`.trim()}
+      className={`cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${VARIANT_CLASSES[variant]} ${className}`.trim()}
       {...rest}
     />
   )
