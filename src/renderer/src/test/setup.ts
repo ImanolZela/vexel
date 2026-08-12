@@ -13,7 +13,11 @@ if (typeof window !== 'undefined') {
       convertImage: vi.fn().mockResolvedValue({ ok: true }),
       getThumbnail: vi.fn().mockResolvedValue(null),
       vectorizeImage: vi.fn().mockResolvedValue({ ok: true, svg: '<svg></svg>' }),
-      writeTextFile: vi.fn().mockResolvedValue({ ok: true })
+      writeTextFile: vi.fn().mockResolvedValue({ ok: true }),
+      enhanceImage: vi.fn().mockResolvedValue({ ok: true }),
+      enhancePreview: vi
+        .fn()
+        .mockResolvedValue({ ok: true, thumbnail: 'data:image/webp;base64,abc' })
     }
   })
 }

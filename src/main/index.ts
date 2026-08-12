@@ -5,6 +5,7 @@ import { registerFileHandlers } from './ipc/files'
 import { registerConvertHandlers } from './ipc/convert'
 import { registerThumbnailHandlers } from './ipc/thumbnail'
 import { registerVectorizeHandlers } from './ipc/vectorize'
+import { registerEnhanceHandlers } from './ipc/enhance'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -52,6 +53,7 @@ app.whenReady().then(() => {
   registerConvertHandlers()
   registerThumbnailHandlers()
   registerVectorizeHandlers()
+  registerEnhanceHandlers()
 
   mainWindow = createWindow()
 

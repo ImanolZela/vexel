@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import sharp from 'sharp'
-import { enhanceImage } from './enhance'
+import { enhanceImage, enhanceImagePreview } from './enhance'
 
 let dir: string
 
@@ -89,5 +89,21 @@ describe('enhanceImage', () => {
     const { data } = await sharp(destPath).raw().toBuffer({ resolveWithObject: true })
     expect(data[0]).toBeLessThan(30)
     expect(data[(width - 1) * channels]).toBeGreaterThan(225)
+  })
+})
+
+describe('enhanceImagePreview', () => {
+  it('returns a small webp data url reflecting the requested scale', async () => {
+    const sourcePath = join(dir, 'source.png')
+    await createSourceImage(sourcePath)
+
+    const dataUrl = await enhanceImagePreview(sourcePath, { scale: 2, sharpen: true }, 30)
+
+    expect(dataUrl.startsWith('data:image/webp;base64,')).toBe(true)
+
+    const base64 = dataUrl.replace('data:image/webp;base64,', '')
+    const metadata = await sharp(Buffer.from(base64, 'base64')).metadata()
+    expect(metadata.width).toBeLessThanOrEqual(30)
+    expect(metadata.height).toBeLessThanOrEqual(30)
   })
 })

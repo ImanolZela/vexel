@@ -12,7 +12,9 @@ const api: VexelAPI = {
   convertImage: (options) => ipcRenderer.invoke('image:convert', options),
   getThumbnail: (path) => ipcRenderer.invoke('image:thumbnail', path),
   vectorizeImage: (options) => ipcRenderer.invoke('image:vectorize', options),
-  writeTextFile: (path, content) => ipcRenderer.invoke('file:write-text', path, content)
+  writeTextFile: (path, content) => ipcRenderer.invoke('file:write-text', path, content),
+  enhanceImage: (options) => ipcRenderer.invoke('image:enhance', options),
+  enhancePreview: (options) => ipcRenderer.invoke('image:enhance-preview', options)
 }
 
 if (process.contextIsolated) {

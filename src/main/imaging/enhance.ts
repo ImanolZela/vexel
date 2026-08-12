@@ -1,4 +1,5 @@
 import sharp from 'sharp'
+import { createThumbnail } from './thumbnail'
 
 export interface EnhanceOptions {
   autoContrast?: boolean
@@ -7,11 +8,10 @@ export interface EnhanceOptions {
   scale?: number
 }
 
-export async function enhanceImage(
+async function buildPipeline(
   sourcePath: string,
-  destPath: string,
   options: EnhanceOptions
-): Promise<void> {
+): Promise<ReturnType<typeof sharp>> {
   let pipeline = sharp(sourcePath)
 
   if (options.autoContrast) {
@@ -36,5 +36,24 @@ export async function enhanceImage(
     pipeline = pipeline.sharpen()
   }
 
+  return pipeline
+}
+
+export async function enhanceImage(
+  sourcePath: string,
+  destPath: string,
+  options: EnhanceOptions
+): Promise<void> {
+  const pipeline = await buildPipeline(sourcePath, options)
   await pipeline.toFile(destPath)
+}
+
+export async function enhanceImagePreview(
+  sourcePath: string,
+  options: EnhanceOptions,
+  maxSize = 240
+): Promise<string> {
+  const pipeline = await buildPipeline(sourcePath, options)
+  const buffer = await pipeline.toBuffer()
+  return createThumbnail(buffer, maxSize)
 }
