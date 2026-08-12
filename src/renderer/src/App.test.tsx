@@ -27,4 +27,19 @@ describe('App', () => {
 
     expect(screen.getByTestId('screen-enhance')).toBeInTheDocument()
   })
+
+  it('animates the screen area on every mode change', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    expect(screen.getByTestId('screen-convert').parentElement).toHaveClass(
+      'animate-[screen-fade-in_180ms_ease-out]'
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Vectorizar' }))
+
+    expect(screen.getByTestId('screen-vectorize').parentElement).toHaveClass(
+      'animate-[screen-fade-in_180ms_ease-out]'
+    )
+  })
 })

@@ -16,9 +16,11 @@ function App(): React.JSX.Element {
         <Sidebar active={mode} onSelect={setMode} />
         <main className="flex-1 overflow-y-auto px-10 py-8">
           <Dropzone />
-          {mode === 'convert' && <ConvertScreen />}
-          {mode === 'vectorize' && <VectorizeScreen />}
-          {mode === 'enhance' && <EnhanceScreen />}
+          <div key={mode} className="animate-[screen-fade-in_180ms_ease-out]">
+            {mode === 'convert' && <ConvertScreen />}
+            {mode === 'vectorize' && <VectorizeScreen />}
+            {mode === 'enhance' && <EnhanceScreen />}
+          </div>
         </main>
       </div>
     </FilesProvider>
