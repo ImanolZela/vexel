@@ -1,6 +1,7 @@
 {
   "name": "vexel",
   "version": "0.1.0",
+  "private": true,
   "description": "Convertir, vectorizar y mejorar imagenes desde el escritorio.",
   "main": "./out/main/index.js",
   "author": "Imanol Zela",
