@@ -1,8 +1,10 @@
 :root {
   --color-bg: #2f2413;
+  --color-surface: #3a2d18;
   --color-accent: #ba7634;
   --color-vectorize: #932f15;
   --color-convert: #5a5630;
+  --color-text: #f5f0e8;
   --color-text-secondary: #a69b92;
 }
 
@@ -19,7 +21,7 @@ body,
 
 body {
   background-color: var(--color-bg);
-  color: #f5f0e8;
+  color: var(--color-text);
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -31,6 +33,69 @@ body {
 #app-shell {
   height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background-color: var(--color-surface);
+  border-right: 1px solid rgba(166, 155, 146, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 12px;
+}
+
+.sidebar-brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  padding: 8px 12px 20px;
+}
+
+.sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(166, 155, 146, 0.1);
+  color: var(--color-text);
+}
+
+.sidebar-item[data-active='true'] {
+  background-color: rgba(166, 155, 146, 0.12);
+  color: var(--color-text);
+  border-left-color: var(--mode-accent, var(--color-accent));
+}
+
+.content {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+}
+
+.screen h1 {
+  margin-top: 0;
+  color: var(--color-text);
+}
+
+.screen p {
+  color: var(--color-text-secondary);
 }
