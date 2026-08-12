@@ -5,7 +5,8 @@ import type { VexelAPI } from './api.d.ts'
 const api: VexelAPI = {
   openFiles: () => ipcRenderer.invoke('dialog:open-files'),
   saveFile: (defaultName) => ipcRenderer.invoke('dialog:save-file', defaultName),
-  getPathForFile: (file) => webUtils.getPathForFile(file)
+  getPathForFile: (file) => webUtils.getPathForFile(file),
+  convertImage: (options) => ipcRenderer.invoke('image:convert', options)
 }
 
 if (process.contextIsolated) {

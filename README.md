@@ -18,15 +18,15 @@ npm run dev
 
 ## Scripts
 
-| Script | Descripción |
-|---|---|
-| `npm run dev` | Levanta la app en modo desarrollo |
-| `npm run build` | Compila main, preload y renderer |
-| `npm start` | Sirve el build de producción |
-| `npm run lint` | Corre ESLint |
-| `npm run format` | Formatea con Prettier |
-| `npm run typecheck` | Chequeo de tipos de TypeScript |
-| `npm test` | Corre los tests con Vitest |
+| Script              | Descripción                       |
+| ------------------- | --------------------------------- |
+| `npm run dev`       | Levanta la app en modo desarrollo |
+| `npm run build`     | Compila main, preload y renderer  |
+| `npm start`         | Sirve el build de producción      |
+| `npm run lint`      | Corre ESLint                      |
+| `npm run format`    | Formatea con Prettier             |
+| `npm run typecheck` | Chequeo de tipos de TypeScript    |
+| `npm test`          | Corre los tests con Vitest        |
 
 ## Licencia
 

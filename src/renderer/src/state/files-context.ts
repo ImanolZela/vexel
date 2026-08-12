@@ -6,9 +6,7 @@ export interface FilesState {
 }
 
 export type FilesAction =
-  | { type: 'add'; files: SelectedFile[] }
-  | { type: 'remove'; path: string }
-  | { type: 'clear' }
+  { type: 'add'; files: SelectedFile[] } | { type: 'remove'; path: string } | { type: 'clear' }
 
 export function filesReducer(state: FilesState, action: FilesAction): FilesState {
   switch (action.type) {

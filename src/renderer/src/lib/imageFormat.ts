@@ -1,0 +1,17 @@
+export const IMAGE_FORMATS = ['png', 'jpeg', 'webp', 'avif', 'tiff', 'gif'] as const
+
+export type ImageFormat = (typeof IMAGE_FORMATS)[number]
+
+const EXTENSION_BY_FORMAT: Record<ImageFormat, string> = {
+  png: 'png',
+  jpeg: 'jpg',
+  webp: 'webp',
+  avif: 'avif',
+  tiff: 'tiff',
+  gif: 'gif'
+}
+
+export function suggestedFileName(sourceName: string, format: ImageFormat): string {
+  const baseName = sourceName.replace(/\.[^./\\]+$/, '')
+  return `${baseName}.${EXTENSION_BY_FORMAT[format]}`
+}
