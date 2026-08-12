@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useFiles } from '../hooks/useFiles'
+import Thumbnail from '../components/Thumbnail'
 import { IMAGE_FORMATS, suggestedFileName, type ImageFormat } from '../lib/imageFormat'
 
 type FileStatus =
   | { state: 'pending' }
   | { state: 'converting' }
-  | { state: 'done' }
+  | { state: 'done'; destPath: string }
   | { state: 'error'; message: string }
 
 function statusLabel(status: FileStatus | undefined): string {
@@ -55,7 +56,9 @@ function ConvertScreen(): React.JSX.Element {
 
       setStatuses((prev) => ({
         ...prev,
-        [file.path]: result.ok ? { state: 'done' } : { state: 'error', message: result.error }
+        [file.path]: result.ok
+          ? { state: 'done', destPath }
+          : { state: 'error', message: result.error }
       }))
     }
 
@@ -128,17 +131,24 @@ function ConvertScreen(): React.JSX.Element {
           )}
 
           <ul className="flex flex-col gap-2">
-            {files.map((file) => (
-              <li
-                key={file.path}
-                className="flex items-center justify-between rounded-lg bg-surface px-3 py-2 text-sm"
-              >
-                <span className="truncate text-text">{file.name}</span>
-                <span className={statusClassName(statuses[file.path])}>
-                  {statusLabel(statuses[file.path])}
-                </span>
-              </li>
-            ))}
+            {files.map((file) => {
+              const status = statuses[file.path]
+              return (
+                <li
+                  key={file.path}
+                  className="flex items-center justify-between gap-3 rounded-lg bg-surface px-3 py-2 text-sm"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Thumbnail path={file.path} alt={file.name} />
+                    {status?.state === 'done' && (
+                      <Thumbnail path={status.destPath} alt={`${file.name} convertido`} />
+                    )}
+                    <span className="truncate text-text">{file.name}</span>
+                  </div>
+                  <span className={statusClassName(status)}>{statusLabel(status)}</span>
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}

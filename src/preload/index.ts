@@ -9,7 +9,8 @@ const api: VexelAPI = {
   chooseDirectory: () => ipcRenderer.invoke('dialog:choose-directory'),
   getPathForFile: (file) => webUtils.getPathForFile(file),
   joinPath: (...segments) => join(...segments),
-  convertImage: (options) => ipcRenderer.invoke('image:convert', options)
+  convertImage: (options) => ipcRenderer.invoke('image:convert', options),
+  getThumbnail: (path) => ipcRenderer.invoke('image:thumbnail', path)
 }
 
 if (process.contextIsolated) {

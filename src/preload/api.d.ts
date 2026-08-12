@@ -10,6 +10,7 @@ export interface VexelAPI {
   getPathForFile: (file: File) => string
   joinPath: (...segments: string[]) => string
   convertImage: (options: ConvertOptions) => Promise<ConvertResult>
+  getThumbnail: (path: string) => Promise<string | null>
 }
 
 declare global {

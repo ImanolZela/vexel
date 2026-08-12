@@ -10,7 +10,8 @@ if (typeof window !== 'undefined') {
       chooseDirectory: vi.fn().mockResolvedValue(null),
       getPathForFile: vi.fn((file: File) => file.name),
       joinPath: vi.fn((...segments: string[]) => segments.join('/')),
-      convertImage: vi.fn().mockResolvedValue({ ok: true })
+      convertImage: vi.fn().mockResolvedValue({ ok: true }),
+      getThumbnail: vi.fn().mockResolvedValue(null)
     }
   })
 }

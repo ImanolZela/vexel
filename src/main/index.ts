@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { is } from '@electron-toolkit/utils'
 import { registerFileHandlers } from './ipc/files'
 import { registerConvertHandlers } from './ipc/convert'
+import { registerThumbnailHandlers } from './ipc/thumbnail'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -48,6 +49,7 @@ function createWindow(): BrowserWindow {
 app.whenReady().then(() => {
   registerFileHandlers(() => mainWindow)
   registerConvertHandlers()
+  registerThumbnailHandlers()
 
   mainWindow = createWindow()
 
