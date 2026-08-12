@@ -19,5 +19,20 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
     }
   },
+  {
+    files: ['scripts/**/*.cjs'],
+    languageOptions: {
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        __dirname: 'readonly',
+        console: 'readonly',
+        process: 'readonly'
+      }
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off'
+    }
+  },
   eslintConfigPrettier
 )

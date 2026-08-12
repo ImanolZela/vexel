@@ -1,0 +1,34 @@
+appId: com.vexel.app
+productName: Vexel
+copyright: Copyright © 2026 Imanol Zela
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**/*
+  - package.json
+
+# sharp ships platform-specific native bindings that must live on disk,
+# not inside the asar archive.
+asarUnpack:
+  - node_modules/sharp/**
+  - node_modules/@img/**
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.png
+  # No code signing certificate yet — placeholder until we have one.
+  signAndEditExecutable: false
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+
+publish: null
