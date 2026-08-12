@@ -4,6 +4,7 @@ import { is } from '@electron-toolkit/utils'
 import { registerFileHandlers } from './ipc/files'
 import { registerConvertHandlers } from './ipc/convert'
 import { registerThumbnailHandlers } from './ipc/thumbnail'
+import { registerVectorizeHandlers } from './ipc/vectorize'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -50,6 +51,7 @@ app.whenReady().then(() => {
   registerFileHandlers(() => mainWindow)
   registerConvertHandlers()
   registerThumbnailHandlers()
+  registerVectorizeHandlers()
 
   mainWindow = createWindow()
 

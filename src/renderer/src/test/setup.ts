@@ -11,7 +11,8 @@ if (typeof window !== 'undefined') {
       getPathForFile: vi.fn((file: File) => file.name),
       joinPath: vi.fn((...segments: string[]) => segments.join('/')),
       convertImage: vi.fn().mockResolvedValue({ ok: true }),
-      getThumbnail: vi.fn().mockResolvedValue(null)
+      getThumbnail: vi.fn().mockResolvedValue(null),
+      vectorizeImage: vi.fn().mockResolvedValue({ ok: true, svg: '<svg></svg>' })
     }
   })
 }
