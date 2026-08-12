@@ -57,13 +57,13 @@ describe('ConvertScreen', () => {
 
     expect(window.api.convertImage).toHaveBeenCalledWith({
       sourcePath: CAT.path,
-      destPath: 'C:\\out\\cat.webp',
+      destPath: 'C:\\out\\cat_vexel.webp',
       format: 'webp',
       quality: 80
     })
     expect(window.api.convertImage).toHaveBeenCalledWith({
       sourcePath: DOG.path,
-      destPath: 'C:\\out\\dog.webp',
+      destPath: 'C:\\out\\dog_vexel.webp',
       format: 'webp',
       quality: 80
     })

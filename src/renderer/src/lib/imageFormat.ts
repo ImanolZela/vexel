@@ -13,5 +13,5 @@ const EXTENSION_BY_FORMAT: Record<ImageFormat, string> = {
 
 export function suggestedFileName(sourceName: string, format: ImageFormat): string {
   const baseName = sourceName.replace(/\.[^./\\]+$/, '')
-  return `${baseName}.${EXTENSION_BY_FORMAT[format]}`
+  return `${baseName}_vexel.${EXTENSION_BY_FORMAT[format]}`
 }
