@@ -1,32 +1,37 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useEffect } from 'react'
 import ConvertScreen from './ConvertScreen'
 import { FilesProvider } from '../state/FilesContext'
 import { useFiles } from '../hooks/useFiles'
+import type { SelectedFile } from '../types/file'
 
-function SeedFile({ path, name }: { path: string; name: string }): null {
+function SeedFiles({ files }: { files: SelectedFile[] }): null {
   const { addFiles } = useFiles()
   useEffect(() => {
-    addFiles([{ path, name }])
-  }, [addFiles, path, name])
+    addFiles(files)
+  }, [addFiles, files])
   return null
 }
 
-function renderWithFile(path = 'C:\\images\\cat.png', name = 'cat.png'): ReturnType<typeof render> {
+function renderWithFiles(files: SelectedFile[]): ReturnType<typeof render> {
   return render(
     <FilesProvider>
-      <SeedFile path={path} name={name} />
+      <SeedFiles files={files} />
       <ConvertScreen />
     </FilesProvider>
   )
 }
 
+const CAT = { path: 'C:\\images\\cat.png', name: 'cat.png' }
+const DOG = { path: 'C:\\images\\dog.png', name: 'dog.png' }
+
 describe('ConvertScreen', () => {
   beforeEach(() => {
-    vi.mocked(window.api.saveFile).mockReset()
+    vi.mocked(window.api.chooseDirectory).mockReset()
     vi.mocked(window.api.convertImage).mockReset()
+    vi.mocked(window.api.joinPath).mockImplementation((...segments) => segments.join('\\'))
   })
 
   it('shows a hint when no file is selected', () => {
@@ -36,45 +41,61 @@ describe('ConvertScreen', () => {
       </FilesProvider>
     )
 
-    expect(screen.getByText('Seleccioná un archivo arriba para convertirlo.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Seleccioná uno o más archivos arriba para convertirlos.')
+    ).toBeInTheDocument()
   })
 
-  it('converts the selected file with the chosen format and quality', async () => {
-    vi.mocked(window.api.saveFile).mockResolvedValue('C:\\images\\cat.webp')
+  it('converts every selected file into the chosen directory', async () => {
+    vi.mocked(window.api.chooseDirectory).mockResolvedValue('C:\\out')
     vi.mocked(window.api.convertImage).mockResolvedValue({ ok: true })
     const user = userEvent.setup()
-    renderWithFile()
+    renderWithFiles([CAT, DOG])
 
     await user.selectOptions(screen.getByRole('combobox'), 'webp')
-    await user.click(screen.getByRole('button', { name: 'Convertir' }))
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (2)' }))
 
-    expect(window.api.saveFile).toHaveBeenCalledWith('cat.webp')
     expect(window.api.convertImage).toHaveBeenCalledWith({
-      sourcePath: 'C:\\images\\cat.png',
-      destPath: 'C:\\images\\cat.webp',
+      sourcePath: CAT.path,
+      destPath: 'C:\\out\\cat.webp',
       format: 'webp',
       quality: 80
     })
-    expect(await screen.findByText('Guardado en C:\\images\\cat.webp')).toBeInTheDocument()
+    expect(window.api.convertImage).toHaveBeenCalledWith({
+      sourcePath: DOG.path,
+      destPath: 'C:\\out\\dog.webp',
+      format: 'webp',
+      quality: 80
+    })
+
+    const catRow = screen.getByText('cat.png').closest('li') as HTMLElement
+    const dogRow = screen.getByText('dog.png').closest('li') as HTMLElement
+    expect(await within(catRow).findByText('Listo')).toBeInTheDocument()
+    expect(await within(dogRow).findByText('Listo')).toBeInTheDocument()
   })
 
-  it('shows an error message when the conversion fails', async () => {
-    vi.mocked(window.api.saveFile).mockResolvedValue('C:\\images\\cat.webp')
-    vi.mocked(window.api.convertImage).mockResolvedValue({ ok: false, error: 'boom' })
+  it('reports a per-file error without stopping the batch', async () => {
+    vi.mocked(window.api.chooseDirectory).mockResolvedValue('C:\\out')
+    vi.mocked(window.api.convertImage).mockImplementation(async (options) => {
+      return options.sourcePath === CAT.path ? { ok: false, error: 'boom' } : { ok: true }
+    })
     const user = userEvent.setup()
-    renderWithFile()
+    renderWithFiles([CAT, DOG])
 
-    await user.click(screen.getByRole('button', { name: 'Convertir' }))
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (2)' }))
 
-    expect(await screen.findByText('boom')).toBeInTheDocument()
+    const catRow = screen.getByText('cat.png').closest('li') as HTMLElement
+    const dogRow = screen.getByText('dog.png').closest('li') as HTMLElement
+    expect(await within(catRow).findByText('boom')).toBeInTheDocument()
+    expect(await within(dogRow).findByText('Listo')).toBeInTheDocument()
   })
 
-  it('does not convert when the save dialog is canceled', async () => {
-    vi.mocked(window.api.saveFile).mockResolvedValue(null)
+  it('does not convert when the directory dialog is canceled', async () => {
+    vi.mocked(window.api.chooseDirectory).mockResolvedValue(null)
     const user = userEvent.setup()
-    renderWithFile()
+    renderWithFiles([CAT])
 
-    await user.click(screen.getByRole('button', { name: 'Convertir' }))
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (1)' }))
 
     expect(window.api.convertImage).not.toHaveBeenCalled()
   })

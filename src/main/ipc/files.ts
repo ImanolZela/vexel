@@ -28,4 +28,15 @@ export function registerFileHandlers(getWindow: () => BrowserWindow | null): voi
 
     return result.canceled || !result.filePath ? null : result.filePath
   })
+
+  ipcMain.handle('dialog:choose-directory', async () => {
+    const window = getWindow()
+    if (!window) return null
+
+    const result = await dialog.showOpenDialog(window, {
+      properties: ['openDirectory', 'createDirectory']
+    })
+
+    return result.canceled || result.filePaths.length === 0 ? null : result.filePaths[0]
+  })
 }

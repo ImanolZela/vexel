@@ -72,4 +72,23 @@ describe('registerFileHandlers', () => {
 
     expect(result).toBeNull()
   })
+
+  it('returns the chosen directory', async () => {
+    vi.mocked(dialog.showOpenDialog).mockResolvedValue({
+      canceled: false,
+      filePaths: ['C:\\images']
+    })
+
+    const result = await handlers.get('dialog:choose-directory')?.()
+
+    expect(result).toBe('C:\\images')
+  })
+
+  it('returns null when the directory dialog is canceled', async () => {
+    vi.mocked(dialog.showOpenDialog).mockResolvedValue({ canceled: true, filePaths: [] })
+
+    const result = await handlers.get('dialog:choose-directory')?.()
+
+    expect(result).toBeNull()
+  })
 })

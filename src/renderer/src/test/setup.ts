@@ -7,7 +7,9 @@ if (typeof window !== 'undefined') {
     value: {
       openFiles: vi.fn().mockResolvedValue([]),
       saveFile: vi.fn().mockResolvedValue(null),
+      chooseDirectory: vi.fn().mockResolvedValue(null),
       getPathForFile: vi.fn((file: File) => file.name),
+      joinPath: vi.fn((...segments: string[]) => segments.join('/')),
       convertImage: vi.fn().mockResolvedValue({ ok: true })
     }
   })

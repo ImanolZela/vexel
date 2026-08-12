@@ -2,42 +2,63 @@ import { useState } from 'react'
 import { useFiles } from '../hooks/useFiles'
 import { IMAGE_FORMATS, suggestedFileName, type ImageFormat } from '../lib/imageFormat'
 
-type Status =
-  { type: 'idle' } | { type: 'success'; message: string } | { type: 'error'; message: string }
+type FileStatus =
+  | { state: 'pending' }
+  | { state: 'converting' }
+  | { state: 'done' }
+  | { state: 'error'; message: string }
+
+function statusLabel(status: FileStatus | undefined): string {
+  if (!status || status.state === 'pending') return 'Pendiente'
+  if (status.state === 'converting') return 'Convirtiendo…'
+  if (status.state === 'done') return 'Listo'
+  return status.message
+}
+
+function statusClassName(status: FileStatus | undefined): string {
+  if (status?.state === 'done') return 'text-convert'
+  if (status?.state === 'error') return 'text-vectorize'
+  return 'text-text-secondary'
+}
 
 function ConvertScreen(): React.JSX.Element {
   const { files } = useFiles()
-  const source = files[0]
 
   const [format, setFormat] = useState<ImageFormat>('png')
   const [quality, setQuality] = useState(80)
   const [isConverting, setIsConverting] = useState(false)
-  const [status, setStatus] = useState<Status>({ type: 'idle' })
+  const [statuses, setStatuses] = useState<Record<string, FileStatus>>({})
 
-  async function handleConvert(): Promise<void> {
-    if (!source) return
+  const doneCount = files.filter(
+    (file) => statuses[file.path]?.state === 'done' || statuses[file.path]?.state === 'error'
+  ).length
+
+  async function handleConvertAll(): Promise<void> {
+    if (files.length === 0) return
+
+    const directory = await window.api.chooseDirectory()
+    if (!directory) return
 
     setIsConverting(true)
-    setStatus({ type: 'idle' })
+    setStatuses(Object.fromEntries(files.map((file) => [file.path, { state: 'pending' }])))
 
-    const destPath = await window.api.saveFile(suggestedFileName(source.name, format))
-    if (!destPath) {
-      setIsConverting(false)
-      return
+    for (const file of files) {
+      setStatuses((prev) => ({ ...prev, [file.path]: { state: 'converting' } }))
+
+      const destPath = window.api.joinPath(directory, suggestedFileName(file.name, format))
+      const result = await window.api.convertImage({
+        sourcePath: file.path,
+        destPath,
+        format,
+        quality
+      })
+
+      setStatuses((prev) => ({
+        ...prev,
+        [file.path]: result.ok ? { state: 'done' } : { state: 'error', message: result.error }
+      }))
     }
 
-    const result = await window.api.convertImage({
-      sourcePath: source.path,
-      destPath,
-      format,
-      quality
-    })
-
-    setStatus(
-      result.ok
-        ? { type: 'success', message: `Guardado en ${destPath}` }
-        : { type: 'error', message: result.error }
-    )
     setIsConverting(false)
   }
 
@@ -48,14 +69,14 @@ function ConvertScreen(): React.JSX.Element {
         Convertí tus imágenes entre PNG, JPG, WEBP, AVIF, TIFF y GIF.
       </p>
 
-      {!source && (
-        <p className="text-text-secondary">Seleccioná un archivo arriba para convertirlo.</p>
+      {files.length === 0 && (
+        <p className="text-text-secondary">
+          Seleccioná uno o más archivos arriba para convertirlos.
+        </p>
       )}
 
-      {source && (
+      {files.length > 0 && (
         <div className="flex flex-col gap-4">
-          <p className="text-text">{source.name}</p>
-
           <label className="flex flex-col gap-1 text-sm text-text-secondary">
             Formato destino
             <select
@@ -84,15 +105,41 @@ function ConvertScreen(): React.JSX.Element {
 
           <button
             type="button"
-            onClick={handleConvert}
+            onClick={handleConvertAll}
             disabled={isConverting}
             className="w-fit cursor-pointer rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-60"
           >
-            {isConverting ? 'Convirtiendo…' : 'Convertir'}
+            {isConverting ? 'Convirtiendo…' : `Convertir todo (${files.length})`}
           </button>
 
-          {status.type === 'success' && <p className="text-convert">{status.message}</p>}
-          {status.type === 'error' && <p className="text-vectorize">{status.message}</p>}
+          {isConverting && (
+            <div
+              role="progressbar"
+              aria-valuenow={doneCount}
+              aria-valuemin={0}
+              aria-valuemax={files.length}
+              className="h-2 overflow-hidden rounded-full bg-surface"
+            >
+              <div
+                className="h-full bg-accent transition-all"
+                style={{ width: `${(doneCount / files.length) * 100}%` }}
+              />
+            </div>
+          )}
+
+          <ul className="flex flex-col gap-2">
+            {files.map((file) => (
+              <li
+                key={file.path}
+                className="flex items-center justify-between rounded-lg bg-surface px-3 py-2 text-sm"
+              >
+                <span className="truncate text-text">{file.name}</span>
+                <span className={statusClassName(statuses[file.path])}>
+                  {statusLabel(statuses[file.path])}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </section>

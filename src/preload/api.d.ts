@@ -6,7 +6,9 @@ export type ConvertResult = { ok: true } | { ok: false; error: string }
 export interface VexelAPI {
   openFiles: () => Promise<string[]>
   saveFile: (defaultName?: string) => Promise<string | null>
+  chooseDirectory: () => Promise<string | null>
   getPathForFile: (file: File) => string
+  joinPath: (...segments: string[]) => string
   convertImage: (options: ConvertOptions) => Promise<ConvertResult>
 }
 
