@@ -1,5 +1,4 @@
 import { useFiles } from '../hooks/useFiles'
-import { useFileDrop } from '../hooks/useFileDrop'
 import Button from './ui/Button'
 
 function fileNameFromPath(path: string): string {
@@ -8,7 +7,6 @@ function fileNameFromPath(path: string): string {
 
 function Dropzone(): React.JSX.Element {
   const { files, addFiles, removeFile } = useFiles()
-  const { isDragging, onDragOver, onDragLeave, onDrop } = useFileDrop()
 
   async function handleBrowse(): Promise<void> {
     const paths = await window.api.openFiles()
@@ -16,14 +14,8 @@ function Dropzone(): React.JSX.Element {
   }
 
   return (
-    <div
-      data-dragging={isDragging}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-      className="mb-6 rounded-xl border-2 border-dashed border-text-secondary/30 p-6 text-center data-[dragging=true]:border-accent data-[dragging=true]:bg-accent/10"
-    >
-      <p className="mb-3 text-text-secondary">Arrastrá imágenes acá</p>
+    <div className="mb-6 rounded-xl border-2 border-dashed border-text-secondary/30 p-6 text-center">
+      <p className="mb-3 text-text-secondary">Arrastrá imágenes a cualquier parte de la ventana</p>
       <Button onClick={handleBrowse}>Seleccionar archivos</Button>
 
       {files.length > 0 && (
@@ -36,6 +28,7 @@ function Dropzone(): React.JSX.Element {
               <span className="truncate">{file.name}</span>
               <button
                 type="button"
+                title={`Quitar ${file.name}`}
                 aria-label={`Quitar ${file.name}`}
                 onClick={() => removeFile(file.path)}
                 className="cursor-pointer text-text-secondary hover:text-vectorize"

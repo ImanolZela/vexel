@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Dropzone from './Dropzone'
@@ -15,7 +15,6 @@ function renderDropzone(): ReturnType<typeof render> {
 describe('Dropzone', () => {
   beforeEach(() => {
     vi.mocked(window.api.openFiles).mockReset()
-    vi.mocked(window.api.getPathForFile).mockReset()
   })
 
   it('adds files picked through the browse button', async () => {
@@ -28,18 +27,6 @@ describe('Dropzone', () => {
     expect(await screen.findByText('cat.png')).toBeInTheDocument()
   })
 
-  it('adds files dropped onto the zone', () => {
-    vi.mocked(window.api.getPathForFile).mockReturnValue('C:\\images\\dog.png')
-    renderDropzone()
-
-    const zone = screen.getByText('Arrastrá imágenes acá').parentElement as HTMLElement
-    const file = new File(['content'], 'dog.png', { type: 'image/png' })
-
-    fireEvent.drop(zone, { dataTransfer: { files: [file] } })
-
-    expect(screen.getByText('dog.png')).toBeInTheDocument()
-  })
-
   it('removes a file when its remove button is clicked', async () => {
     vi.mocked(window.api.openFiles).mockResolvedValue(['C:\\images\\cat.png'])
     const user = userEvent.setup()
@@ -50,5 +37,19 @@ describe('Dropzone', () => {
     await user.click(screen.getByRole('button', { name: 'Quitar cat.png' }))
 
     expect(screen.queryByText('cat.png')).not.toBeInTheDocument()
+  })
+
+  it('gives the remove button a tooltip', async () => {
+    vi.mocked(window.api.openFiles).mockResolvedValue(['C:\\images\\cat.png'])
+    const user = userEvent.setup()
+    renderDropzone()
+
+    await user.click(screen.getByRole('button', { name: 'Seleccionar archivos' }))
+    await screen.findByText('cat.png')
+
+    expect(screen.getByRole('button', { name: 'Quitar cat.png' })).toHaveAttribute(
+      'title',
+      'Quitar cat.png'
+    )
   })
 })

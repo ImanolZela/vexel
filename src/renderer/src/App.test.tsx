@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 
 describe('App', () => {
@@ -41,5 +41,32 @@ describe('App', () => {
     expect(screen.getByTestId('screen-vectorize').parentElement).toHaveClass(
       'animate-[screen-fade-in_180ms_ease-out]'
     )
+  })
+
+  describe('global drag and drop', () => {
+    beforeEach(() => {
+      vi.mocked(window.api.getPathForFile).mockReset()
+    })
+
+    it('shows an overlay while dragging anywhere over the window', () => {
+      render(<App />)
+      const shell = document.getElementById('app-shell') as HTMLElement
+
+      fireEvent.dragOver(shell)
+
+      expect(screen.getByText('Soltá para agregar imágenes')).toBeInTheDocument()
+    })
+
+    it('adds a file dropped anywhere over the window, not just the dropzone box', () => {
+      vi.mocked(window.api.getPathForFile).mockReturnValue('C:\\images\\dog.png')
+      render(<App />)
+      const shell = document.getElementById('app-shell') as HTMLElement
+      const file = new File(['content'], 'dog.png', { type: 'image/png' })
+
+      fireEvent.drop(shell, { dataTransfer: { files: [file] } })
+
+      expect(screen.getAllByText('dog.png').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Soltá para agregar imágenes')).not.toBeInTheDocument()
+    })
   })
 })
