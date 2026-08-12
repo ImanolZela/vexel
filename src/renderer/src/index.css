@@ -1,0 +1,36 @@
+:root {
+  --color-bg: #2f2413;
+  --color-accent: #ba7634;
+  --color-vectorize: #932f15;
+  --color-convert: #5a5630;
+  --color-text-secondary: #a69b92;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: #f5f0e8;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+#app-shell {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
