@@ -93,6 +93,29 @@ describe('EnhanceScreen', () => {
     })
   })
 
+  it('applies a preset and requests a preview with its options', async () => {
+    vi.mocked(window.api.enhancePreview).mockResolvedValue({ ok: true, thumbnail: 'x' })
+    renderWithFile()
+    await resolvePreview()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Upscale rápido' }).click()
+    })
+    await resolvePreview()
+
+    expect(window.api.enhancePreview).toHaveBeenLastCalledWith({
+      sourcePath: CAT.path,
+      autoContrast: false,
+      denoise: false,
+      sharpen: true,
+      scale: 2
+    })
+    expect(screen.getByRole('button', { name: 'Upscale rápido' })).toHaveAttribute(
+      'data-active',
+      'true'
+    )
+  })
+
   it('shows an error message when the preview fails', async () => {
     vi.mocked(window.api.enhancePreview).mockResolvedValue({ ok: false, error: 'boom' })
     renderWithFile()

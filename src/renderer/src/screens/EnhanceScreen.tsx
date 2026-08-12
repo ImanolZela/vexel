@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useFiles } from '../hooks/useFiles'
 import Thumbnail from '../components/Thumbnail'
 import { suggestedEnhancedFileName } from '../lib/enhancedFileName'
+import { ENHANCE_PRESETS } from '../lib/enhancePresets'
 
 const DEBOUNCE_MS = 400
 
@@ -91,6 +92,25 @@ function EnhanceScreen(): React.JSX.Element {
 
       {source && (
         <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2">
+            {ENHANCE_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                data-active={
+                  options.autoContrast === preset.options.autoContrast &&
+                  options.denoise === preset.options.denoise &&
+                  options.sharpen === preset.options.sharpen &&
+                  options.scale === preset.options.scale
+                }
+                onClick={() => setOptions(preset.options)}
+                className="cursor-pointer rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary data-[active=true]:border-accent data-[active=true]:text-text"
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
           <label className="flex items-center gap-2 text-sm text-text-secondary">
             <input
               type="checkbox"
