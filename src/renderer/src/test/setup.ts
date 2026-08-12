@@ -1,1 +1,13 @@
 import '@testing-library/jest-dom/vitest'
+import { vi } from 'vitest'
+
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'api', {
+    writable: true,
+    value: {
+      openFiles: vi.fn().mockResolvedValue([]),
+      saveFile: vi.fn().mockResolvedValue(null),
+      getPathForFile: vi.fn((file: File) => file.name)
+    }
+  })
+}

@@ -1,6 +1,9 @@
 import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'node:path'
 import { is } from '@electron-toolkit/utils'
+import { registerFileHandlers } from './ipc/files'
+
+let mainWindow: BrowserWindow | null = null
 
 function createWindow(): BrowserWindow {
   const window = new BrowserWindow({
@@ -21,6 +24,12 @@ function createWindow(): BrowserWindow {
     window.show()
   })
 
+  window.on('closed', () => {
+    if (mainWindow === window) {
+      mainWindow = null
+    }
+  })
+
   window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -36,11 +45,13 @@ function createWindow(): BrowserWindow {
 }
 
 app.whenReady().then(() => {
-  createWindow()
+  registerFileHandlers(() => mainWindow)
+
+  mainWindow = createWindow()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      mainWindow = createWindow()
     }
   })
 })

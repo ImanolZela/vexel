@@ -1,6 +1,10 @@
 import type { ElectronAPI } from '@electron-toolkit/preload'
 
-export type VexelAPI = Record<string, never>
+export interface VexelAPI {
+  openFiles: () => Promise<string[]>
+  saveFile: (defaultName?: string) => Promise<string | null>
+  getPathForFile: (file: File) => string
+}
 
 declare global {
   interface Window {
