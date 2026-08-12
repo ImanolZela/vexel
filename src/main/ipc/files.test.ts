@@ -1,4 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { dialog } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { registerFileHandlers } from './files'
@@ -90,5 +93,34 @@ describe('registerFileHandlers', () => {
     const result = await handlers.get('dialog:choose-directory')?.()
 
     expect(result).toBeNull()
+  })
+
+  describe('file:write-text', () => {
+    let dir: string
+
+    beforeEach(async () => {
+      dir = await mkdtemp(join(tmpdir(), 'vexel-write-text-'))
+    })
+
+    afterEach(async () => {
+      await rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+    })
+
+    it('writes the given content to the given path', async () => {
+      const path = join(dir, 'out.svg')
+
+      const result = await handlers.get('file:write-text')?.({}, path, '<svg></svg>')
+
+      expect(result).toEqual({ ok: true })
+      expect(await readFile(path, 'utf8')).toBe('<svg></svg>')
+    })
+
+    it('returns an error when the path is not writable', async () => {
+      const path = join(dir, 'missing-folder', 'out.svg')
+
+      const result = await handlers.get('file:write-text')?.({}, path, '<svg></svg>')
+
+      expect(result).toMatchObject({ ok: false })
+    })
   })
 })

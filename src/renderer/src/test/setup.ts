@@ -12,7 +12,8 @@ if (typeof window !== 'undefined') {
       joinPath: vi.fn((...segments: string[]) => segments.join('/')),
       convertImage: vi.fn().mockResolvedValue({ ok: true }),
       getThumbnail: vi.fn().mockResolvedValue(null),
-      vectorizeImage: vi.fn().mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+      vectorizeImage: vi.fn().mockResolvedValue({ ok: true, svg: '<svg></svg>' }),
+      writeTextFile: vi.fn().mockResolvedValue({ ok: true })
     }
   })
 }

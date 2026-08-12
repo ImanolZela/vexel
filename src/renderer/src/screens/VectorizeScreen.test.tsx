@@ -24,10 +24,18 @@ function renderWithFile(): ReturnType<typeof render> {
   )
 }
 
+async function resolveVectorize(): Promise<void> {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(400)
+  })
+}
+
 describe('VectorizeScreen', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.mocked(window.api.vectorizeImage).mockReset()
+    vi.mocked(window.api.saveFile).mockReset()
+    vi.mocked(window.api.writeTextFile).mockReset()
   })
 
   afterEach(() => {
@@ -51,14 +59,13 @@ describe('VectorizeScreen', () => {
     })
     renderWithFile()
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(400)
-    })
+    await resolveVectorize()
 
     expect(window.api.vectorizeImage).toHaveBeenCalledWith({
       sourcePath: CAT.path,
       colors: 6,
-      turdSize: 2
+      turdSize: 2,
+      optTolerance: 0.2
     })
     expect(
       screen.getByTestId('vectorize-preview').querySelector('[data-testid="stub"]')
@@ -68,24 +75,19 @@ describe('VectorizeScreen', () => {
   it('re-vectorizes with new parameters when a control changes', async () => {
     vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
     renderWithFile()
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(400)
-    })
+    await resolveVectorize()
 
     const [colorsSlider] = screen.getAllByRole('slider')
     act(() => {
       fireChange(colorsSlider, '10')
     })
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(400)
-    })
+    await resolveVectorize()
 
     expect(window.api.vectorizeImage).toHaveBeenLastCalledWith({
       sourcePath: CAT.path,
       colors: 10,
-      turdSize: 2
+      turdSize: 2,
+      optTolerance: 0.2
     })
   })
 
@@ -93,11 +95,47 @@ describe('VectorizeScreen', () => {
     vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: false, error: 'boom' })
     renderWithFile()
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(400)
-    })
+    await resolveVectorize()
 
     expect(screen.getByText('boom')).toBeInTheDocument()
+  })
+
+  it('shows the resulting file size once vectorized', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    renderWithFile()
+
+    await resolveVectorize()
+
+    expect(screen.getByText(/Tamaño:/)).toBeInTheDocument()
+  })
+
+  it('exports the svg to the chosen path', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    vi.mocked(window.api.saveFile).mockResolvedValue('C:\\images\\cat.svg')
+    vi.mocked(window.api.writeTextFile).mockResolvedValue({ ok: true })
+    renderWithFile()
+    await resolveVectorize()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Exportar SVG' }).click()
+    })
+
+    expect(window.api.saveFile).toHaveBeenCalledWith('cat.svg')
+    expect(window.api.writeTextFile).toHaveBeenCalledWith('C:\\images\\cat.svg', '<svg></svg>')
+    expect(screen.getByText('Guardado en C:\\images\\cat.svg')).toBeInTheDocument()
+  })
+
+  it('does not export when the save dialog is canceled', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    vi.mocked(window.api.saveFile).mockResolvedValue(null)
+    renderWithFile()
+    await resolveVectorize()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Exportar SVG' }).click()
+    })
+
+    expect(window.api.writeTextFile).not.toHaveBeenCalled()
   })
 })
 

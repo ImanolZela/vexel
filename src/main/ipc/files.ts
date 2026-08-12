@@ -1,8 +1,11 @@
 import { dialog, ipcMain, type BrowserWindow } from 'electron'
+import { writeFile } from 'node:fs/promises'
 
 const IMAGE_FILTERS = [
   { name: 'Imágenes', extensions: ['png', 'jpg', 'jpeg', 'webp', 'avif', 'tiff', 'gif', 'svg'] }
 ]
+
+export type WriteTextFileResult = { ok: true } | { ok: false; error: string }
 
 export function registerFileHandlers(getWindow: () => BrowserWindow | null): void {
   ipcMain.handle('dialog:open-files', async () => {
@@ -39,4 +42,16 @@ export function registerFileHandlers(getWindow: () => BrowserWindow | null): voi
 
     return result.canceled || result.filePaths.length === 0 ? null : result.filePaths[0]
   })
+
+  ipcMain.handle(
+    'file:write-text',
+    async (_event, path: string, content: string): Promise<WriteTextFileResult> => {
+      try {
+        await writeFile(path, content, 'utf8')
+        return { ok: true }
+      } catch (error) {
+        return { ok: false, error: error instanceof Error ? error.message : 'Unknown error' }
+      }
+    }
+  )
 }
