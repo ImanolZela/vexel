@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useFiles } from '../hooks/useFiles'
 import Thumbnail from '../components/Thumbnail'
+import Button from '../components/ui/Button'
+import Slider from '../components/ui/Slider'
+import StatusMessage from '../components/ui/StatusMessage'
 import { IMAGE_FORMATS, suggestedFileName, type ImageFormat } from '../lib/imageFormat'
 
 type FileStatus =
@@ -73,9 +76,9 @@ function ConvertScreen(): React.JSX.Element {
       </p>
 
       {files.length === 0 && (
-        <p className="text-text-secondary">
+        <StatusMessage tone="info">
           Seleccioná uno o más archivos arriba para convertirlos.
-        </p>
+        </StatusMessage>
       )}
 
       {files.length > 0 && (
@@ -95,25 +98,11 @@ function ConvertScreen(): React.JSX.Element {
             </select>
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-text-secondary">
-            Calidad ({quality})
-            <input
-              type="range"
-              min={1}
-              max={100}
-              value={quality}
-              onChange={(event) => setQuality(Number(event.target.value))}
-            />
-          </label>
+          <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
 
-          <button
-            type="button"
-            onClick={handleConvertAll}
-            disabled={isConverting}
-            className="w-fit cursor-pointer rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-60"
-          >
+          <Button onClick={handleConvertAll} disabled={isConverting}>
             {isConverting ? 'Convirtiendo…' : `Convertir todo (${files.length})`}
-          </button>
+          </Button>
 
           {isConverting && (
             <div

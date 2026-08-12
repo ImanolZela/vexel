@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useFiles } from '../hooks/useFiles'
+import Button from '../components/ui/Button'
+import Slider from '../components/ui/Slider'
+import StatusMessage from '../components/ui/StatusMessage'
 import { suggestedSvgFileName } from '../lib/svgFileName'
 import { formatBytes } from '../lib/formatBytes'
 
@@ -79,47 +82,27 @@ function VectorizeScreen(): React.JSX.Element {
       </p>
 
       {!source && (
-        <p className="text-text-secondary">Seleccioná un archivo arriba para vectorizarlo.</p>
+        <StatusMessage tone="info">Seleccioná un archivo arriba para vectorizarlo.</StatusMessage>
       )}
 
       {source && (
         <div className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-sm text-text-secondary">
-            Colores ({colors})
-            <input
-              type="range"
-              min={2}
-              max={16}
-              value={colors}
-              onChange={(event) => setColors(Number(event.target.value))}
-            />
-          </label>
+          <Slider label="Colores" value={colors} min={2} max={16} onChange={setColors} />
 
-          <label className="flex flex-col gap-1 text-sm text-text-secondary">
-            Suavizado ({turdSize})
-            <input
-              type="range"
-              min={0}
-              max={10}
-              value={turdSize}
-              onChange={(event) => setTurdSize(Number(event.target.value))}
-            />
-          </label>
+          <Slider label="Suavizado" value={turdSize} min={0} max={10} onChange={setTurdSize} />
 
-          <label className="flex flex-col gap-1 text-sm text-text-secondary">
-            Simplificar curvas ({optTolerance.toFixed(1)})
-            <input
-              type="range"
-              min={0.1}
-              max={2}
-              step={0.1}
-              value={optTolerance}
-              onChange={(event) => setOptTolerance(Number(event.target.value))}
-            />
-          </label>
+          <Slider
+            label="Simplificar curvas"
+            value={optTolerance}
+            min={0.1}
+            max={2}
+            step={0.1}
+            formatValue={(value) => value.toFixed(1)}
+            onChange={setOptTolerance}
+          />
 
-          {isLoading && <p className="text-text-secondary">Vectorizando…</p>}
-          {error && <p className="text-vectorize">{error}</p>}
+          {isLoading && <StatusMessage tone="info">Vectorizando…</StatusMessage>}
+          {error && <StatusMessage tone="error">{error}</StatusMessage>}
 
           {svg && (
             <>
@@ -133,20 +116,15 @@ function VectorizeScreen(): React.JSX.Element {
                 Tamaño: {formatBytes(new Blob([svg]).size)}
               </p>
 
-              <button
-                type="button"
-                onClick={handleExport}
-                disabled={isExporting}
-                className="w-fit cursor-pointer rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-60"
-              >
+              <Button onClick={handleExport} disabled={isExporting}>
                 {isExporting ? 'Exportando…' : 'Exportar SVG'}
-              </button>
+              </Button>
 
               {exportStatus.type === 'success' && (
-                <p className="text-convert">Guardado en {exportStatus.path}</p>
+                <StatusMessage tone="success">Guardado en {exportStatus.path}</StatusMessage>
               )}
               {exportStatus.type === 'error' && (
-                <p className="text-vectorize">{exportStatus.message}</p>
+                <StatusMessage tone="error">{exportStatus.message}</StatusMessage>
               )}
             </>
           )}

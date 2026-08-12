@@ -1,5 +1,6 @@
 import { useFiles } from '../hooks/useFiles'
 import { useFileDrop } from '../hooks/useFileDrop'
+import Button from './ui/Button'
 
 function fileNameFromPath(path: string): string {
   return path.split(/[\\/]/).pop() ?? path
@@ -23,13 +24,7 @@ function Dropzone(): React.JSX.Element {
       className="mb-6 rounded-xl border-2 border-dashed border-text-secondary/30 p-6 text-center data-[dragging=true]:border-accent data-[dragging=true]:bg-accent/10"
     >
       <p className="mb-3 text-text-secondary">Arrastrá imágenes acá</p>
-      <button
-        type="button"
-        onClick={handleBrowse}
-        className="cursor-pointer rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg"
-      >
-        Seleccionar archivos
-      </button>
+      <Button onClick={handleBrowse}>Seleccionar archivos</Button>
 
       {files.length > 0 && (
         <ul className="mt-4 flex flex-col gap-2 text-left">
