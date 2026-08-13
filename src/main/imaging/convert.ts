@@ -45,7 +45,10 @@ export async function convertImage(options: ConvertOptions): Promise<void> {
       pipeline.jpeg(quality ? { quality } : undefined)
       break
     case 'webp':
-      pipeline.webp(quality ? { quality } : undefined)
+      // effort maxes out libwebp's compression search (0-6, sharp defaults
+      // to 4). Same quality, consistently smaller files — slower to encode,
+      // but a one-off desktop conversion can afford it.
+      pipeline.webp({ effort: 6, ...(quality ? { quality } : {}) })
       break
     case 'avif':
       pipeline.avif(quality ? { quality } : undefined)

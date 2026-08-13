@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -21,6 +21,27 @@ async function createSourcePng(path: string): Promise<void> {
   })
     .png()
     .toFile(path)
+}
+
+async function createNoisyPng(path: string): Promise<void> {
+  // A flat-color swatch compresses identically no matter how hard the
+  // encoder tries. Give it real texture so compression effort has
+  // something to actually optimize.
+  const width = 64
+  const height = 64
+  const channels = 3
+  const data = Buffer.alloc(width * height * channels)
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const offset = (y * width + x) * channels
+      data[offset] = (x * 7 + y * 13) % 256
+      data[offset + 1] = (x * 3 + y * 29) % 256
+      data[offset + 2] = (x * 17 + y * 5) % 256
+    }
+  }
+
+  await sharp(data, { raw: { width, height, channels } }).png().toFile(path)
 }
 
 async function createFramedPng(path: string): Promise<void> {
@@ -89,6 +110,19 @@ describe('convertImage', () => {
     ])
 
     expect(low.size ?? 0).toBeLessThan(high.size ?? Infinity)
+  })
+
+  it('encodes webp at a higher compression effort than the sharp default', async () => {
+    const sourcePath = join(dir, 'noisy.png')
+    const destPath = join(dir, 'out.webp')
+    await createNoisyPng(sourcePath)
+
+    await convertImage({ sourcePath, destPath, format: 'webp', quality: 80 })
+    const tunedSize = (await stat(destPath)).size
+
+    const defaultEffortBuffer = await sharp(sourcePath).webp({ quality: 80, effort: 4 }).toBuffer()
+
+    expect(tunedSize).toBeLessThanOrEqual(defaultEffortBuffer.length)
   })
 
   it('makes the detected background transparent when removeBackground is set', async () => {
