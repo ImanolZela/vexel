@@ -2,6 +2,9 @@ export const IMAGE_FORMATS = ['png', 'jpeg', 'webp', 'avif', 'tiff', 'gif'] as c
 
 export type ImageFormat = (typeof IMAGE_FORMATS)[number]
 
+// jpeg has no alpha channel, so "quitar fondo" has nothing to make transparent.
+export const FORMATS_SUPPORTING_ALPHA: ImageFormat[] = ['png', 'webp', 'avif', 'tiff', 'gif']
+
 const EXTENSION_BY_FORMAT: Record<ImageFormat, string> = {
   png: 'png',
   jpeg: 'jpg',

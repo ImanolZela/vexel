@@ -59,13 +59,15 @@ describe('ConvertScreen', () => {
       sourcePath: CAT.path,
       destPath: 'C:\\out\\cat_vexel.webp',
       format: 'webp',
-      quality: 80
+      quality: 80,
+      removeBackground: false
     })
     expect(window.api.convertImage).toHaveBeenCalledWith({
       sourcePath: DOG.path,
       destPath: 'C:\\out\\dog_vexel.webp',
       format: 'webp',
-      quality: 80
+      quality: 80,
+      removeBackground: false
     })
 
     const catRow = screen.getByText('cat.png').closest('li') as HTMLElement
@@ -88,6 +90,45 @@ describe('ConvertScreen', () => {
     const dogRow = screen.getByText('dog.png').closest('li') as HTMLElement
     expect(await within(catRow).findByText('boom')).toBeInTheDocument()
     expect(await within(dogRow).findByText('Listo')).toBeInTheDocument()
+  })
+
+  it('sends removeBackground when the checkbox is checked for an alpha-capable format', async () => {
+    vi.mocked(window.api.chooseDirectory).mockResolvedValue('C:\\out')
+    vi.mocked(window.api.convertImage).mockResolvedValue({ ok: true })
+    const user = userEvent.setup()
+    renderWithFiles([CAT])
+
+    await user.click(screen.getByLabelText('Quitar fondo'))
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (1)' }))
+
+    expect(window.api.convertImage).toHaveBeenCalledWith({
+      sourcePath: CAT.path,
+      destPath: 'C:\\out\\cat_vexel.png',
+      format: 'png',
+      quality: 80,
+      removeBackground: true
+    })
+  })
+
+  it('disables and ignores removeBackground for jpeg, which has no alpha channel', async () => {
+    vi.mocked(window.api.chooseDirectory).mockResolvedValue('C:\\out')
+    vi.mocked(window.api.convertImage).mockResolvedValue({ ok: true })
+    const user = userEvent.setup()
+    renderWithFiles([CAT])
+
+    await user.selectOptions(screen.getByRole('combobox'), 'jpeg')
+
+    expect(screen.getByLabelText(/Quitar fondo/)).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (1)' }))
+
+    expect(window.api.convertImage).toHaveBeenCalledWith({
+      sourcePath: CAT.path,
+      destPath: 'C:\\out\\cat_vexel.jpg',
+      format: 'jpeg',
+      quality: 80,
+      removeBackground: false
+    })
   })
 
   it('does not convert when the directory dialog is canceled', async () => {

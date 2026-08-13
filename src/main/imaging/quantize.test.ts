@@ -70,4 +70,41 @@ describe('quantizeImage', () => {
 
     expect(result.palette.length).toBeLessThanOrEqual(8)
   })
+
+  it('reports the palette index closest to the corner-sampled background', async () => {
+    const sourcePath = join(dir, 'framed.png')
+    const width = 12
+    const height = 12
+    const channels = 3
+    const data = Buffer.alloc(width * height * channels)
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const offset = (y * width + x) * channels
+        // Center square stays clear of the 4px corner sample squares.
+        const isCenter = x >= 4 && x < 8 && y >= 4 && y < 8
+        data[offset] = isCenter ? 30 : 255
+        data[offset + 1] = isCenter ? 120 : 255
+        data[offset + 2] = isCenter ? 200 : 255
+      }
+    }
+    await sharp(data, { raw: { width, height, channels } }).png().toFile(sourcePath)
+
+    const result = await quantizeImage(sourcePath, { colors: 2, detectBackground: true })
+
+    expect(result.backgroundIndex).toBeDefined()
+    const background = result.palette[result.backgroundIndex as number]
+    expect(background.r).toBeGreaterThan(200)
+    expect(background.g).toBeGreaterThan(200)
+    expect(background.b).toBeGreaterThan(200)
+  })
+
+  it('omits backgroundIndex when detectBackground is not requested', async () => {
+    const sourcePath = join(dir, 'two-colors.png')
+    await createTwoColorImage(sourcePath)
+
+    const result = await quantizeImage(sourcePath, { colors: 2 })
+
+    expect(result.backgroundIndex).toBeUndefined()
+  })
 })

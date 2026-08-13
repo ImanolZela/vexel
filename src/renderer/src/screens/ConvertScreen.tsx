@@ -3,8 +3,14 @@ import { useFiles } from '../hooks/useFiles'
 import Thumbnail from '../components/Thumbnail'
 import Button from '../components/ui/Button'
 import Slider from '../components/ui/Slider'
+import Checkbox from '../components/ui/Checkbox'
 import StatusMessage from '../components/ui/StatusMessage'
-import { IMAGE_FORMATS, suggestedFileName, type ImageFormat } from '../lib/imageFormat'
+import {
+  FORMATS_SUPPORTING_ALPHA,
+  IMAGE_FORMATS,
+  suggestedFileName,
+  type ImageFormat
+} from '../lib/imageFormat'
 
 type FileStatus =
   | { state: 'pending' }
@@ -30,8 +36,11 @@ function ConvertScreen(): React.JSX.Element {
 
   const [format, setFormat] = useState<ImageFormat>('png')
   const [quality, setQuality] = useState(80)
+  const [removeBackground, setRemoveBackground] = useState(false)
   const [isConverting, setIsConverting] = useState(false)
   const [statuses, setStatuses] = useState<Record<string, FileStatus>>({})
+
+  const supportsAlpha = FORMATS_SUPPORTING_ALPHA.includes(format)
 
   const doneCount = files.filter(
     (file) => statuses[file.path]?.state === 'done' || statuses[file.path]?.state === 'error'
@@ -54,7 +63,8 @@ function ConvertScreen(): React.JSX.Element {
         sourcePath: file.path,
         destPath,
         format,
-        quality
+        quality,
+        removeBackground: supportsAlpha && removeBackground
       })
 
       setStatuses((prev) => ({
@@ -99,6 +109,17 @@ function ConvertScreen(): React.JSX.Element {
           </label>
 
           <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
+
+          <Checkbox
+            label={
+              supportsAlpha
+                ? 'Quitar fondo'
+                : 'Quitar fondo (no disponible para JPG, no soporta transparencia)'
+            }
+            checked={supportsAlpha && removeBackground}
+            onChange={setRemoveBackground}
+            disabled={!supportsAlpha}
+          />
 
           <Button onClick={handleConvertAll} disabled={isConverting}>
             {isConverting ? 'Convirtiendo…' : `Convertir todo (${files.length})`}

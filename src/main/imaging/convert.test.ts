@@ -23,6 +23,26 @@ async function createSourcePng(path: string): Promise<void> {
     .toFile(path)
 }
 
+async function createFramedPng(path: string): Promise<void> {
+  const width = 12
+  const height = 12
+  const channels = 3
+  const data = Buffer.alloc(width * height * channels)
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const offset = (y * width + x) * channels
+      // Center square stays clear of the 4px corner sample squares.
+      const isCenter = x >= 4 && x < 8 && y >= 4 && y < 8
+      data[offset] = isCenter ? 30 : 255
+      data[offset + 1] = isCenter ? 120 : 255
+      data[offset + 2] = isCenter ? 200 : 255
+    }
+  }
+
+  await sharp(data, { raw: { width, height, channels } }).png().toFile(path)
+}
+
 describe('convertImage', () => {
   const cases: Array<[ImageFormat, string]> = [
     ['png', 'png'],
@@ -69,5 +89,34 @@ describe('convertImage', () => {
     ])
 
     expect(low.size ?? 0).toBeLessThan(high.size ?? Infinity)
+  })
+
+  it('makes the detected background transparent when removeBackground is set', async () => {
+    const sourcePath = join(dir, 'framed.png')
+    const destPath = join(dir, 'out.png')
+    await createFramedPng(sourcePath)
+
+    await convertImage({ sourcePath, destPath, format: 'png', removeBackground: true })
+
+    const { data, info } = await sharp(destPath).raw().toBuffer({ resolveWithObject: true })
+    expect(info.channels).toBe(4)
+
+    const cornerOffset = 0
+    expect(data[cornerOffset + 3]).toBe(0)
+
+    const centerOffset = (5 * info.width + 5) * 4
+    expect(data[centerOffset + 3]).toBe(255)
+  })
+
+  it('ignores removeBackground for jpeg, which has no alpha channel', async () => {
+    const sourcePath = join(dir, 'framed.png')
+    const destPath = join(dir, 'out.jpeg')
+    await createFramedPng(sourcePath)
+
+    await convertImage({ sourcePath, destPath, format: 'jpeg', removeBackground: true })
+
+    const metadata = await sharp(destPath).metadata()
+    expect(metadata.format).toBe('jpeg')
+    expect(metadata.hasAlpha).toBe(false)
   })
 })

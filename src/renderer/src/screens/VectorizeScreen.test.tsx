@@ -65,7 +65,8 @@ describe('VectorizeScreen', () => {
       sourcePath: CAT.path,
       colors: 12,
       turdSize: 2,
-      optTolerance: 0.2
+      optTolerance: 0.2,
+      removeBackground: false
     })
     expect(
       screen.getByTestId('vectorize-preview').querySelector('[data-testid="stub"]')
@@ -87,7 +88,27 @@ describe('VectorizeScreen', () => {
       sourcePath: CAT.path,
       colors: 10,
       turdSize: 2,
-      optTolerance: 0.2
+      optTolerance: 0.2,
+      removeBackground: false
+    })
+  })
+
+  it('re-vectorizes with removeBackground when the checkbox is toggled', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    renderWithFile()
+    await resolveVectorize()
+
+    act(() => {
+      screen.getByLabelText('Quitar fondo').click()
+    })
+    await resolveVectorize()
+
+    expect(window.api.vectorizeImage).toHaveBeenLastCalledWith({
+      sourcePath: CAT.path,
+      colors: 12,
+      turdSize: 2,
+      optTolerance: 0.2,
+      removeBackground: true
     })
   })
 

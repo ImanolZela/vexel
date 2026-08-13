@@ -1,14 +1,12 @@
 import sharp from 'sharp'
+import { colorDistance, detectBackgroundColor, type RGB } from './background'
 
-export interface RGB {
-  r: number
-  g: number
-  b: number
-}
+export type { RGB }
 
 export interface QuantizeOptions {
   colors: number
   bucketBits?: number
+  detectBackground?: boolean
 }
 
 export interface QuantizeResult {
@@ -16,13 +14,7 @@ export interface QuantizeResult {
   height: number
   palette: RGB[]
   masks: Uint8Array[]
-}
-
-function colorDistance(a: RGB, b: RGB): number {
-  const dr = a.r - b.r
-  const dg = a.g - b.g
-  const db = a.b - b.b
-  return dr * dr + dg * dg + db * db
+  backgroundIndex?: number
 }
 
 export async function quantizeImage(
@@ -93,5 +85,20 @@ export async function quantizeImage(
     masks[bestIndex][i] = 1
   }
 
-  return { width, height, palette, masks }
+  let backgroundIndex: number | undefined
+  if (options.detectBackground) {
+    const backgroundColor = detectBackgroundColor(data, width, height, channels)
+    let bestIndex = 0
+    let bestDistance = Infinity
+    for (let p = 0; p < palette.length; p++) {
+      const distance = colorDistance(palette[p], backgroundColor)
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestIndex = p
+      }
+    }
+    backgroundIndex = bestIndex
+  }
+
+  return { width, height, palette, masks, backgroundIndex }
 }

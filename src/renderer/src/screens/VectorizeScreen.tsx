@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useFiles } from '../hooks/useFiles'
 import Button from '../components/ui/Button'
 import Slider from '../components/ui/Slider'
+import Checkbox from '../components/ui/Checkbox'
 import StatusMessage from '../components/ui/StatusMessage'
 import { suggestedSvgFileName } from '../lib/svgFileName'
 import { formatBytes } from '../lib/formatBytes'
@@ -17,8 +18,14 @@ interface VectorizeState {
 type ExportStatus =
   { type: 'idle' } | { type: 'success'; path: string } | { type: 'error'; message: string }
 
-function requestKey(path: string, colors: number, turdSize: number, optTolerance: number): string {
-  return `${path}|${colors}|${turdSize}|${optTolerance}`
+function requestKey(
+  path: string,
+  colors: number,
+  turdSize: number,
+  optTolerance: number,
+  removeBackground: boolean
+): string {
+  return `${path}|${colors}|${turdSize}|${optTolerance}|${removeBackground}`
 }
 
 function VectorizeScreen(): React.JSX.Element {
@@ -28,11 +35,14 @@ function VectorizeScreen(): React.JSX.Element {
   const [colors, setColors] = useState(12)
   const [turdSize, setTurdSize] = useState(2)
   const [optTolerance, setOptTolerance] = useState(0.2)
+  const [removeBackground, setRemoveBackground] = useState(false)
   const [state, setState] = useState<VectorizeState>({ key: '', svg: null, error: null })
   const [isExporting, setIsExporting] = useState(false)
   const [exportStatus, setExportStatus] = useState<ExportStatus>({ type: 'idle' })
 
-  const currentKey = source ? requestKey(source.path, colors, turdSize, optTolerance) : null
+  const currentKey = source
+    ? requestKey(source.path, colors, turdSize, optTolerance, removeBackground)
+    : null
   const isLoading = source !== undefined && currentKey !== state.key
   const svg = currentKey === state.key ? state.svg : null
   const error = currentKey === state.key ? state.error : null
@@ -40,14 +50,15 @@ function VectorizeScreen(): React.JSX.Element {
   useEffect(() => {
     if (!source) return
 
-    const key = requestKey(source.path, colors, turdSize, optTolerance)
+    const key = requestKey(source.path, colors, turdSize, optTolerance, removeBackground)
 
     const timeoutId = window.setTimeout(async () => {
       const result = await window.api.vectorizeImage({
         sourcePath: source.path,
         colors,
         turdSize,
-        optTolerance
+        optTolerance,
+        removeBackground
       })
       setState(
         result.ok ? { key, svg: result.svg, error: null } : { key, svg: null, error: result.error }
@@ -55,7 +66,7 @@ function VectorizeScreen(): React.JSX.Element {
     }, DEBOUNCE_MS)
 
     return () => window.clearTimeout(timeoutId)
-  }, [source, colors, turdSize, optTolerance])
+  }, [source, colors, turdSize, optTolerance, removeBackground])
 
   async function handleExport(): Promise<void> {
     if (!source || !svg) return
@@ -99,6 +110,12 @@ function VectorizeScreen(): React.JSX.Element {
             step={0.1}
             formatValue={(value) => value.toFixed(1)}
             onChange={setOptTolerance}
+          />
+
+          <Checkbox
+            label="Quitar fondo"
+            checked={removeBackground}
+            onChange={setRemoveBackground}
           />
 
           {isLoading && <StatusMessage tone="info">Vectorizando…</StatusMessage>}
