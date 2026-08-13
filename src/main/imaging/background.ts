@@ -58,21 +58,16 @@ const REMOVE_TOLERANCE = 36
 const REMOVE_FEATHER = 24
 
 /**
- * Flood-fills outward from every border pixel that's close to `background`,
- * expanding across 4-connected neighbors that are also close to it. This
- * finds the actual background region — unlike a plain color match, it won't
- * grab a white dress pattern, the whites of an eye, or any other detail deep
- * inside the subject that merely happens to share the background's color,
- * because those aren't reachable from the edge without crossing pixels of a
- * different color.
+ * Flood-fills outward from every border cell where `isBackground` is true,
+ * expanding across 4-connected neighbors that also satisfy it. A cell deep
+ * inside the image that merely satisfies `isBackground` in isolation —
+ * a white dress pattern, the whites of an eye — is left alone unless it's
+ * actually reachable from the edge without crossing a cell that doesn't.
  */
-export function floodFillBackgroundMask(
-  data: Uint8Array | Buffer,
+export function floodFillFromBorder(
   width: number,
   height: number,
-  channels: number,
-  background: RGB,
-  tolerance = REMOVE_TOLERANCE
+  isBackground: (index: number) => boolean
 ): Uint8Array {
   const pixelCount = width * height
   const mask = new Uint8Array(pixelCount) // 1 = part of the background region
@@ -81,16 +76,10 @@ export function floodFillBackgroundMask(
   let head = 0
   let tail = 0
 
-  function isBackgroundColor(i: number): boolean {
-    const offset = i * channels
-    const pixel = { r: data[offset], g: data[offset + 1], b: data[offset + 2] }
-    return Math.sqrt(colorDistance(pixel, background)) <= tolerance
-  }
-
   function tryEnqueue(i: number): void {
     if (visited[i]) return
     visited[i] = 1
-    if (isBackgroundColor(i)) {
+    if (isBackground(i)) {
       mask[i] = 1
       queue[tail++] = i
     }
@@ -116,6 +105,30 @@ export function floodFillBackgroundMask(
   }
 
   return mask
+}
+
+/**
+ * Flood-fills outward from every border pixel that's close to `background`,
+ * expanding across 4-connected neighbors that are also close to it. This
+ * finds the actual background region — unlike a plain color match, it won't
+ * grab a white dress pattern, the whites of an eye, or any other detail deep
+ * inside the subject that merely happens to share the background's color,
+ * because those aren't reachable from the edge without crossing pixels of a
+ * different color.
+ */
+export function floodFillBackgroundMask(
+  data: Uint8Array | Buffer,
+  width: number,
+  height: number,
+  channels: number,
+  background: RGB,
+  tolerance = REMOVE_TOLERANCE
+): Uint8Array {
+  return floodFillFromBorder(width, height, (i) => {
+    const offset = i * channels
+    const pixel = { r: data[offset], g: data[offset + 1], b: data[offset + 2] }
+    return Math.sqrt(colorDistance(pixel, background)) <= tolerance
+  })
 }
 
 /**

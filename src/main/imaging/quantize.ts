@@ -1,10 +1,5 @@
 import sharp from 'sharp'
-import {
-  colorDistance,
-  detectBackgroundColor,
-  floodFillBackgroundMask,
-  type RGB
-} from './background'
+import { colorDistance, detectBackgroundColor, floodFillFromBorder, type RGB } from './background'
 
 export type { RGB }
 
@@ -12,6 +7,7 @@ export interface QuantizeOptions {
   colors: number
   bucketBits?: number
   detectBackground?: boolean
+  blurSigma?: number
 }
 
 export interface QuantizeResult {
@@ -89,11 +85,17 @@ export async function quantizeImage(
   // palette slot. 4 bits/channel (16 levels) merges that noise back together.
   const bucketBits = options.bucketBits ?? 4
   const shift = 8 - bucketBits
+  // A source photo's anti-aliased edges sit between two flat colors, so
+  // nearest-color assignment flips back and forth pixel by pixel along
+  // every boundary, tracing as a speckled, dotted line instead of a clean
+  // curve. A slight pre-blur collapses that noisy transition band before
+  // classification, without visibly softening real detail.
+  const blurSigma = options.blurSigma ?? 0.6
 
-  const { data, info } = await sharp(sourcePath)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true })
+  let pipeline = sharp(sourcePath).ensureAlpha()
+  if (blurSigma > 0) pipeline = pipeline.blur(blurSigma)
+
+  const { data, info } = await pipeline.raw().toBuffer({ resolveWithObject: true })
 
   const { width, height, channels } = info
   const pixelCount = width * height
@@ -142,15 +144,27 @@ export async function quantizeImage(
   let paletteResult = palette
 
   if (options.detectBackground) {
-    // Only clear pixels connected to the edge, so a detail that merely
-    // shares the background's color (dress pattern, teeth, eye highlights)
-    // stays put instead of being punched out along with the real background.
+    // Flood-fill over the *classification itself* — is this pixel already
+    // assigned to the background-like palette color, and connected to the
+    // edge — rather than re-testing raw pixel color against a separate
+    // tolerance. That keeps this exactly consistent with what actually gets
+    // drawn, so a blurred edge can't leave a thin ring that's neither
+    // clearly background nor clearly foreground half-cleared.
     const backgroundColor = detectBackgroundColor(data, width, height, channels)
-    const backgroundMask = floodFillBackgroundMask(data, width, height, channels, backgroundColor)
-    for (const mask of masks) {
-      for (let i = 0; i < pixelCount; i++) {
-        if (backgroundMask[i]) mask[i] = 0
+    let backgroundIndex = 0
+    let backgroundDistance = Infinity
+    for (let p = 0; p < palette.length; p++) {
+      const distance = colorDistance(palette[p], backgroundColor)
+      if (distance < backgroundDistance) {
+        backgroundDistance = distance
+        backgroundIndex = p
       }
+    }
+
+    const backgroundMask = masks[backgroundIndex]
+    const connected = floodFillFromBorder(width, height, (i) => backgroundMask[i] === 1)
+    for (let i = 0; i < pixelCount; i++) {
+      if (connected[i]) backgroundMask[i] = 0
     }
 
     // Drop palette entries left with nothing to draw (typically the

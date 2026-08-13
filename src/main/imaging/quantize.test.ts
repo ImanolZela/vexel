@@ -39,7 +39,9 @@ describe('quantizeImage', () => {
     const sourcePath = join(dir, 'two-colors.png')
     await createTwoColorImage(sourcePath)
 
-    const result = await quantizeImage(sourcePath, { colors: 2 })
+    // blurSigma disabled: this fixture is tiny enough that the default
+    // pre-blur (meant for photo-sized edges) would smear it end to end.
+    const result = await quantizeImage(sourcePath, { colors: 2, blurSigma: 0 })
 
     expect(result.width).toBe(4)
     expect(result.height).toBe(4)
@@ -114,6 +116,70 @@ describe('quantizeImage', () => {
     expect(hasBlue).toBe(true)
   })
 
+  it('smooths a noisy anti-aliased edge instead of tracing it as a speckled line', async () => {
+    // 60x10: solid color A on the left, solid color B on the right, with a
+    // 10px transition band between them that linearly blends A->B but has
+    // a checkerboard jitter added on top — standing in for the noisy
+    // anti-aliasing band a real JPEG edge produces. Without smoothing, that
+    // jitter flips nearest-color assignment pixel by pixel near the
+    // midpoint instead of cleanly splitting at it.
+    const width = 60
+    const height = 10
+    const channels = 3
+    const bandStart = 25
+    const bandWidth = 10
+    const jitter = 25
+
+    function buildImage(): Buffer {
+      const data = Buffer.alloc(width * height * channels)
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const offset = (y * width + x) * channels
+          let value: number
+          if (x < bandStart) {
+            value = 0 // pure A: (0, 0, 200)
+          } else if (x >= bandStart + bandWidth) {
+            value = 200 // pure B: (200, 0, 0)
+          } else {
+            const t = (x - bandStart) / bandWidth
+            const base = t * 200
+            const sign = (x + y) % 2 === 0 ? 1 : -1
+            value = Math.min(200, Math.max(0, base + sign * jitter))
+          }
+          data[offset] = value
+          data[offset + 1] = 0
+          data[offset + 2] = 200 - value
+        }
+      }
+      return data
+    }
+
+    async function countBandMismatches(blurSigma: number): Promise<number> {
+      const sourcePath = join(dir, `edge-${blurSigma}.png`)
+      await sharp(buildImage(), { raw: { width, height, channels } }).png().toFile(sourcePath)
+
+      const result = await quantizeImage(sourcePath, { colors: 2, blurSigma })
+      const blueIndex = result.palette.findIndex((color) => color.b > color.r)
+      const blueMask = result.masks[blueIndex]
+
+      let mismatches = 0
+      for (let y = 0; y < height; y++) {
+        for (let x = bandStart; x < bandStart + bandWidth; x++) {
+          const truthIsBlue = x < bandStart + bandWidth / 2
+          const isBlue = blueMask[y * width + x] === 1
+          if (isBlue !== truthIsBlue) mismatches++
+        }
+      }
+      return mismatches
+    }
+
+    const unblurred = await countBandMismatches(0)
+    const blurred = await countBandMismatches(0.6)
+
+    expect(unblurred).toBeGreaterThan(0)
+    expect(blurred).toBeLessThan(unblurred)
+  })
+
   it('drops the background palette entry once its region is cleared', async () => {
     const sourcePath = join(dir, 'framed.png')
     const width = 12
@@ -133,10 +199,16 @@ describe('quantizeImage', () => {
     }
     await sharp(data, { raw: { width, height, channels } }).png().toFile(sourcePath)
 
-    const withBackground = await quantizeImage(sourcePath, { colors: 2 })
+    // blurSigma disabled: this fixture is tiny enough that the default
+    // pre-blur (meant for photo-sized edges) would smear it end to end.
+    const withBackground = await quantizeImage(sourcePath, { colors: 2, blurSigma: 0 })
     expect(withBackground.palette).toHaveLength(2)
 
-    const withoutBackground = await quantizeImage(sourcePath, { colors: 2, detectBackground: true })
+    const withoutBackground = await quantizeImage(sourcePath, {
+      colors: 2,
+      detectBackground: true,
+      blurSigma: 0
+    })
     expect(withoutBackground.palette).toHaveLength(1)
     expect(withoutBackground.palette[0].r).toBeLessThan(80)
   })
