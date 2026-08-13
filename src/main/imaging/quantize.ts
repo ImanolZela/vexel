@@ -1,5 +1,10 @@
 import sharp from 'sharp'
-import { colorDistance, detectBackgroundColor, type RGB } from './background'
+import {
+  colorDistance,
+  detectBackgroundColor,
+  floodFillBackgroundMask,
+  type RGB
+} from './background'
 
 export type { RGB }
 
@@ -14,7 +19,6 @@ export interface QuantizeResult {
   height: number
   palette: RGB[]
   masks: Uint8Array[]
-  backgroundIndex?: number
 }
 
 export async function quantizeImage(
@@ -66,7 +70,7 @@ export async function quantizeImage(
       b: Math.round(bucket.b / bucket.count)
     }))
 
-  const masks = palette.map(() => new Uint8Array(pixelCount))
+  let masks = palette.map(() => new Uint8Array(pixelCount))
 
   for (let i = 0; i < pixelCount; i++) {
     const offset = i * channels
@@ -85,20 +89,26 @@ export async function quantizeImage(
     masks[bestIndex][i] = 1
   }
 
-  let backgroundIndex: number | undefined
+  let paletteResult = palette
+
   if (options.detectBackground) {
+    // Only clear pixels connected to the edge, so a detail that merely
+    // shares the background's color (dress pattern, teeth, eye highlights)
+    // stays put instead of being punched out along with the real background.
     const backgroundColor = detectBackgroundColor(data, width, height, channels)
-    let bestIndex = 0
-    let bestDistance = Infinity
-    for (let p = 0; p < palette.length; p++) {
-      const distance = colorDistance(palette[p], backgroundColor)
-      if (distance < bestDistance) {
-        bestDistance = distance
-        bestIndex = p
+    const backgroundMask = floodFillBackgroundMask(data, width, height, channels, backgroundColor)
+    for (const mask of masks) {
+      for (let i = 0; i < pixelCount; i++) {
+        if (backgroundMask[i]) mask[i] = 0
       }
     }
-    backgroundIndex = bestIndex
+
+    // Drop palette entries left with nothing to draw (typically the
+    // background color itself, once its region has been cleared above).
+    const keep = masks.map((mask) => mask.includes(1))
+    paletteResult = palette.filter((_, index) => keep[index])
+    masks = masks.filter((_, index) => keep[index])
   }
 
-  return { width, height, palette, masks, backgroundIndex }
+  return { width, height, palette: paletteResult, masks }
 }

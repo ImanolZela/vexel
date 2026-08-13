@@ -17,19 +17,16 @@ export async function vectorizeImage(
   options: VectorizeOptions
 ): Promise<string> {
   const { colors, bucketBits, removeBackground, ...traceOptions } = options
-  const { width, height, palette, masks, backgroundIndex } = await quantizeImage(sourcePath, {
+  const { width, height, palette, masks } = await quantizeImage(sourcePath, {
     colors,
     bucketBits,
     detectBackground: removeBackground
   })
 
   const pathTags = await Promise.all(
-    palette
-      .map((color, index) => ({ color, index }))
-      .filter(({ index }) => index !== backgroundIndex)
-      .map(({ color, index }) =>
-        traceMaskToPathTag(masks[index], width, height, rgbToHex(color), traceOptions)
-      )
+    palette.map((color, index) =>
+      traceMaskToPathTag(masks[index], width, height, rgbToHex(color), traceOptions)
+    )
   )
 
   return (

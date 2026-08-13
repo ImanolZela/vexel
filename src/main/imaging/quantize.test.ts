@@ -71,7 +71,7 @@ describe('quantizeImage', () => {
     expect(result.palette.length).toBeLessThanOrEqual(8)
   })
 
-  it('reports the palette index closest to the corner-sampled background', async () => {
+  it('drops the background palette entry once its region is cleared', async () => {
     const sourcePath = join(dir, 'framed.png')
     const width = 12
     const height = 12
@@ -90,21 +90,48 @@ describe('quantizeImage', () => {
     }
     await sharp(data, { raw: { width, height, channels } }).png().toFile(sourcePath)
 
-    const result = await quantizeImage(sourcePath, { colors: 2, detectBackground: true })
+    const withBackground = await quantizeImage(sourcePath, { colors: 2 })
+    expect(withBackground.palette).toHaveLength(2)
 
-    expect(result.backgroundIndex).toBeDefined()
-    const background = result.palette[result.backgroundIndex as number]
-    expect(background.r).toBeGreaterThan(200)
-    expect(background.g).toBeGreaterThan(200)
-    expect(background.b).toBeGreaterThan(200)
+    const withoutBackground = await quantizeImage(sourcePath, { colors: 2, detectBackground: true })
+    expect(withoutBackground.palette).toHaveLength(1)
+    expect(withoutBackground.palette[0].r).toBeLessThan(80)
   })
 
-  it('omits backgroundIndex when detectBackground is not requested', async () => {
-    const sourcePath = join(dir, 'two-colors.png')
-    await createTwoColorImage(sourcePath)
+  it('keeps a background-colored detail that is not connected to the edge', async () => {
+    // 16x16: white background, a blue ring from [3,12), and a white island
+    // enclosed by the ring at [6,9) — same color as the background but
+    // unreachable from the border, like a dress pattern or a tooth.
+    const sourcePath = join(dir, 'island.png')
+    const size = 16
+    const channels = 3
+    const data = Buffer.alloc(size * size * channels)
 
-    const result = await quantizeImage(sourcePath, { colors: 2 })
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const offset = (y * size + x) * channels
+        const inRing = x >= 3 && x < 12 && y >= 3 && y < 12
+        const inIsland = x >= 6 && x < 9 && y >= 6 && y < 9
+        const isBackground = !inRing || inIsland
+        data[offset] = isBackground ? 255 : 30
+        data[offset + 1] = isBackground ? 255 : 120
+        data[offset + 2] = isBackground ? 255 : 200
+      }
+    }
+    await sharp(data, { raw: { width: size, height: size, channels } })
+      .png()
+      .toFile(sourcePath)
 
-    expect(result.backgroundIndex).toBeUndefined()
+    const result = await quantizeImage(sourcePath, { colors: 2, detectBackground: true })
+
+    expect(result.palette).toHaveLength(2)
+    const whiteIndex = result.palette.findIndex((color) => color.r > 200)
+    const whiteMask = result.masks[whiteIndex]
+
+    const islandOffset = 7 * size + 7
+    expect(whiteMask[islandOffset]).toBe(1)
+
+    const cornerOffset = 0
+    expect(whiteMask[cornerOffset]).toBe(0)
   })
 })

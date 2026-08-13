@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { colorDistance, detectBackgroundColor, stripBackground } from './background'
+import {
+  colorDistance,
+  detectBackgroundColor,
+  floodFillBackgroundMask,
+  stripBackground
+} from './background'
 
 const WIDTH = 12
 const HEIGHT = 12
@@ -36,6 +41,37 @@ describe('detectBackgroundColor', () => {
     const detected = detectBackgroundColor(data, WIDTH, HEIGHT, CHANNELS)
 
     expect(detected).toEqual(BG)
+  })
+})
+
+describe('floodFillBackgroundMask', () => {
+  it('does not mark a background-colored island that is not connected to the edge', () => {
+    // 16x16: white background, a blue ring from [3,12), and a white island
+    // fully enclosed by the ring at [6,9) — same color as the background,
+    // but unreachable from the border without crossing the ring.
+    const size = 16
+    const data = new Uint8Array(size * size * CHANNELS)
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const offset = (y * size + x) * CHANNELS
+        const inRing = x >= 3 && x < 12 && y >= 3 && y < 12
+        const inIsland = x >= 6 && x < 9 && y >= 6 && y < 9
+        const color = inRing && !inIsland ? FG : BG
+        data[offset] = color.r
+        data[offset + 1] = color.g
+        data[offset + 2] = color.b
+      }
+    }
+
+    const mask = floodFillBackgroundMask(data, size, size, CHANNELS, BG)
+
+    expect(mask[0]).toBe(1) // corner: real background
+
+    const islandOffset = 7 * size + 7 // inside the enclosed island
+    expect(mask[islandOffset]).toBe(0)
+
+    const ringOffset = 5 * size + 5 // inside the ring itself
+    expect(mask[ringOffset]).toBe(0)
   })
 })
 
