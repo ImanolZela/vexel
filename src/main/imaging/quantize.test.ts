@@ -71,6 +71,49 @@ describe('quantizeImage', () => {
     expect(result.palette.length).toBeLessThanOrEqual(8)
   })
 
+  it('reserves a palette slot for a distinct color even when it is outnumbered by near-duplicate shades of another color', async () => {
+    // 30x30: three close blue shades (12 apart, well inside the merge
+    // tolerance) split across most of the canvas — like JPEG noise across
+    // one big region — plus a small, clearly different red patch. Naively
+    // taking the top-2 most frequent raw buckets would pick two of the blue
+    // shades and drop red entirely; merging near-duplicates first should
+    // free up a slot for it despite its much lower pixel count.
+    const sourcePath = join(dir, 'noisy-region.png')
+    const width = 30
+    const height = 30
+    const channels = 3
+    const data = Buffer.alloc(width * height * channels)
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const offset = (y * width + x) * channels
+        const isRedPatch = y < 5 && x < 5
+        let color: [number, number, number]
+        if (isRedPatch) {
+          color = [200, 20, 20]
+        } else if (y < 12) {
+          color = [10, 10, 180]
+        } else if (y < 21) {
+          color = [10, 10, 168]
+        } else {
+          color = [10, 10, 156]
+        }
+        data[offset] = color[0]
+        data[offset + 1] = color[1]
+        data[offset + 2] = color[2]
+      }
+    }
+    await sharp(data, { raw: { width, height, channels } }).png().toFile(sourcePath)
+
+    const result = await quantizeImage(sourcePath, { colors: 2 })
+
+    expect(result.palette).toHaveLength(2)
+    const hasRed = result.palette.some((color) => color.r > 150 && color.g < 100 && color.b < 100)
+    const hasBlue = result.palette.some((color) => color.b > 100 && color.r < 100)
+    expect(hasRed).toBe(true)
+    expect(hasBlue).toBe(true)
+  })
+
   it('drops the background palette entry once its region is cleared', async () => {
     const sourcePath = join(dir, 'framed.png')
     const width = 12
