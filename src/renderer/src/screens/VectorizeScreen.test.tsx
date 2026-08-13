@@ -63,7 +63,7 @@ describe('VectorizeScreen', () => {
 
     expect(window.api.vectorizeImage).toHaveBeenCalledWith({
       sourcePath: CAT.path,
-      colors: 6,
+      colors: 12,
       turdSize: 2,
       optTolerance: 0.2
     })

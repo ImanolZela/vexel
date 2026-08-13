@@ -25,7 +25,7 @@ function VectorizeScreen(): React.JSX.Element {
   const { files } = useFiles()
   const source = files[0]
 
-  const [colors, setColors] = useState(6)
+  const [colors, setColors] = useState(12)
   const [turdSize, setTurdSize] = useState(2)
   const [optTolerance, setOptTolerance] = useState(0.2)
   const [state, setState] = useState<VectorizeState>({ key: '', svg: null, error: null })

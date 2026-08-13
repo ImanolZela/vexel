@@ -30,7 +30,11 @@ export async function quantizeImage(
   options: QuantizeOptions
 ): Promise<QuantizeResult> {
   const colors = Math.max(1, options.colors)
-  const bucketBits = options.bucketBits ?? 5
+  // 5 bits/channel (32 levels) is fine-grained enough that JPEG compression
+  // noise splits a single visual color (e.g. one blue) into several distinct
+  // buckets, which then out-compete real colors (like skin tones) for a
+  // palette slot. 4 bits/channel (16 levels) merges that noise back together.
+  const bucketBits = options.bucketBits ?? 4
   const shift = 8 - bucketBits
 
   const { data, info } = await sharp(sourcePath)
