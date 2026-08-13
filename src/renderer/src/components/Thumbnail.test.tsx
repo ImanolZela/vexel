@@ -27,4 +27,15 @@ describe('Thumbnail', () => {
 
     expect(window.api.getThumbnail).not.toHaveBeenCalled()
   })
+
+  it('defaults to the small size and grows with the size prop', async () => {
+    vi.mocked(window.api.getThumbnail).mockResolvedValue('data:image/webp;base64,abc')
+    const { rerender } = render(<Thumbnail path="cat.png" alt="cat" />)
+
+    const img = await screen.findByAltText('cat')
+    expect(img.parentElement).toHaveClass('h-12', 'w-12')
+
+    rerender(<Thumbnail path="cat.png" alt="cat" size="lg" />)
+    expect(img.parentElement).toHaveClass('h-24', 'w-24')
+  })
 })

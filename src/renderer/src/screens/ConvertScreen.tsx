@@ -140,7 +140,7 @@ function ConvertScreen(): React.JSX.Element {
             </div>
           )}
 
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-3">
             {files.map((file) => {
               const status = statuses[file.path]
               return (
@@ -149,10 +149,19 @@ function ConvertScreen(): React.JSX.Element {
                   className="flex items-center justify-between gap-3 rounded-lg bg-surface px-3 py-2 text-sm"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <Thumbnail path={file.path} alt={file.name} />
-                    {status?.state === 'done' && (
-                      <Thumbnail path={status.destPath} alt={`${file.name} convertido`} />
-                    )}
+                    <Thumbnail path={file.path} alt={file.name} size="md" />
+                    <span aria-hidden="true" className="text-lg text-text-secondary">
+                      →
+                    </span>
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg">
+                      {status?.state === 'done' && (
+                        <Thumbnail
+                          path={status.destPath}
+                          alt={`${file.name} convertido`}
+                          size="md"
+                        />
+                      )}
+                    </div>
                     <span className="truncate text-text">{file.name}</span>
                   </div>
                   <span className={statusClassName(status)}>{statusLabel(status)}</span>
