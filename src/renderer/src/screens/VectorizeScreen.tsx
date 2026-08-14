@@ -88,9 +88,11 @@ function VectorizeScreen(): React.JSX.Element {
   }
 
   return (
-    <section className="max-w-2xl" data-testid="screen-vectorize">
-      <div className="mb-2 flex items-center gap-2.5">
-        <VectorizeIcon className="h-6 w-6 shrink-0 text-[var(--mode-accent)]" />
+    <section className="max-w-5xl" data-testid="screen-vectorize">
+      <div className="mb-2 flex items-center gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--mode-accent)]/15">
+          <VectorizeIcon className="h-5 w-5 text-[var(--mode-accent)]" />
+        </div>
         <h1 className="m-0 text-2xl font-semibold text-text">Vectorizar</h1>
       </div>
       <p className="mb-6 text-text-secondary">
@@ -105,7 +107,10 @@ function VectorizeScreen(): React.JSX.Element {
       )}
 
       {source && (
-        <div className="flex flex-col gap-4">
+        // Settings pinned to a fixed-width column, preview taking the rest —
+        // on a narrow window (below the lg breakpoint) it stacks instead, so
+        // a wide window doesn't just leave the extra space empty.
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_1fr]">
           <Card>
             <Slider label="Colores" value={colors} min={2} max={16} onChange={setColors} />
 
@@ -128,33 +133,35 @@ function VectorizeScreen(): React.JSX.Element {
             />
           </Card>
 
-          {isLoading && <StatusMessage tone="info">Vectorizando…</StatusMessage>}
-          {error && <StatusMessage tone="error">{error}</StatusMessage>}
+          <div className="flex flex-col gap-4">
+            {isLoading && <StatusMessage tone="info">Vectorizando…</StatusMessage>}
+            {error && <StatusMessage tone="error">{error}</StatusMessage>}
 
-          {svg && (
-            <Card>
-              <div
-                data-testid="vectorize-preview"
-                className="rounded-lg bg-bg p-4"
-                dangerouslySetInnerHTML={{ __html: svg }}
-              />
+            {svg && (
+              <Card>
+                <div
+                  data-testid="vectorize-preview"
+                  className="rounded-lg bg-bg p-4"
+                  dangerouslySetInnerHTML={{ __html: svg }}
+                />
 
-              <p className="text-sm text-text-secondary">
-                Tamaño: {formatBytes(new Blob([svg]).size)}
-              </p>
+                <p className="text-sm text-text-secondary">
+                  Tamaño: {formatBytes(new Blob([svg]).size)}
+                </p>
 
-              <Button onClick={handleExport} disabled={isExporting}>
-                {isExporting ? 'Exportando…' : 'Exportar SVG'}
-              </Button>
+                <Button onClick={handleExport} disabled={isExporting}>
+                  {isExporting ? 'Exportando…' : 'Exportar SVG'}
+                </Button>
 
-              {exportStatus.type === 'success' && (
-                <StatusMessage tone="success">Guardado en {exportStatus.path}</StatusMessage>
-              )}
-              {exportStatus.type === 'error' && (
-                <StatusMessage tone="error">{exportStatus.message}</StatusMessage>
-              )}
-            </Card>
-          )}
+                {exportStatus.type === 'success' && (
+                  <StatusMessage tone="success">Guardado en {exportStatus.path}</StatusMessage>
+                )}
+                {exportStatus.type === 'error' && (
+                  <StatusMessage tone="error">{exportStatus.message}</StatusMessage>
+                )}
+              </Card>
+            )}
+          </div>
         </div>
       )}
     </section>

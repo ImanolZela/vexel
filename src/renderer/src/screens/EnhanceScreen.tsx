@@ -96,9 +96,11 @@ function EnhanceScreen(): React.JSX.Element {
   }
 
   return (
-    <section className="max-w-2xl" data-testid="screen-enhance">
-      <div className="mb-2 flex items-center gap-2.5">
-        <EnhanceIcon className="h-6 w-6 shrink-0 text-[var(--mode-accent)]" />
+    <section className="max-w-5xl" data-testid="screen-enhance">
+      <div className="mb-2 flex items-center gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--mode-accent)]/15">
+          <EnhanceIcon className="h-5 w-5 text-[var(--mode-accent)]" />
+        </div>
         <h1 className="m-0 text-2xl font-semibold text-text">Mejorar</h1>
       </div>
       <p className="mb-6 text-text-secondary">
@@ -113,7 +115,10 @@ function EnhanceScreen(): React.JSX.Element {
       )}
 
       {source && (
-        <div className="flex flex-col gap-4">
+        // Same fixed-settings / flexible-preview split as Vectorizar — and
+        // the extra room in the right column on a wide window goes to
+        // showing the before/after thumbnails bigger (lg, not md).
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_1fr]">
           <Card>
             <div className="flex flex-wrap gap-2">
               {ENHANCE_PRESETS.map((preset) => (
@@ -158,18 +163,18 @@ function EnhanceScreen(): React.JSX.Element {
           </Card>
 
           <Card>
-            <div className="flex items-end gap-3">
+            <div className="flex flex-wrap items-end gap-4">
               <div>
                 <p className="mb-1 text-xs text-text-secondary">Antes</p>
-                <Thumbnail path={source.path} alt={`${source.name} original`} size="md" />
+                <Thumbnail path={source.path} alt={`${source.name} original`} size="lg" />
               </div>
-              <span aria-hidden="true" className="mb-2 text-lg text-text-secondary">
+              <span aria-hidden="true" className="mb-4 text-xl text-text-secondary">
                 →
               </span>
               <div>
                 <p className="mb-1 text-xs text-text-secondary">Después</p>
                 <div
-                  className={`flex ${THUMBNAIL_SIZE_CLASSES.md} shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg`}
+                  className={`flex ${THUMBNAIL_SIZE_CLASSES.lg} shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg`}
                 >
                   {afterThumbnail && (
                     <img

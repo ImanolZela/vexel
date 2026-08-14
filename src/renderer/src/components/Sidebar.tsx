@@ -22,11 +22,15 @@ function Sidebar({ active, onSelect }: SidebarProps): React.JSX.Element {
                 className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg border-l-[3px] px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)] ${
                   mode.id === active
                     ? 'border-l-[var(--mode-accent)] bg-text-secondary/10 text-text'
-                    : 'border-transparent text-text-secondary hover:bg-text-secondary/10 hover:text-text'
+                    : 'border-l-[var(--mode-accent)]/30 text-text-secondary hover:border-l-[var(--mode-accent)]/70 hover:bg-text-secondary/10 hover:text-text'
                 }`}
                 onClick={() => onSelect(mode.id)}
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                {/* Icon keeps its own mode color even when inactive — Mejorar's
+                    neutral accent is the exception, so all three colors in
+                    the palette actually show up together, not just whichever
+                    mode happens to be selected. */}
+                <Icon className="h-4 w-4 shrink-0 text-[var(--mode-accent)]" />
                 {mode.label}
               </button>
             </li>

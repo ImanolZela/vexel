@@ -86,9 +86,11 @@ function ConvertScreen(): React.JSX.Element {
   }
 
   return (
-    <section className="max-w-2xl" data-testid="screen-convert">
-      <div className="mb-2 flex items-center gap-2.5">
-        <ConvertIcon className="h-6 w-6 shrink-0 text-[var(--mode-accent)]" />
+    <section className="max-w-5xl" data-testid="screen-convert">
+      <div className="mb-2 flex items-center gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--mode-accent)]/15">
+          <ConvertIcon className="h-5 w-5 text-[var(--mode-accent)]" />
+        </div>
         <h1 className="m-0 text-2xl font-semibold text-text">Convertir</h1>
       </div>
       <p className="mb-6 text-text-secondary">
@@ -105,7 +107,10 @@ function ConvertScreen(): React.JSX.Element {
       )}
 
       {files.length > 0 && (
-        <div className="flex flex-col gap-4">
+        // Settings pinned to a fixed-width column, the file list taking the
+        // rest — on a narrow window (below the lg breakpoint) it stacks
+        // instead, so a wide window doesn't just leave the space empty.
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_1fr]">
           <Card>
             <div className="flex flex-col gap-1.5">
               <span className="text-sm text-text-secondary">Formato destino</span>
