@@ -20,4 +20,15 @@ describe('StatusMessage', () => {
 
     expect(screen.getByText('Cargando…')).toHaveClass('text-text-secondary')
   })
+
+  it('announces errors assertively and other tones politely', () => {
+    const { rerender } = render(<StatusMessage tone="error">boom</StatusMessage>)
+    expect(screen.getByRole('alert')).toHaveTextContent('boom')
+
+    rerender(<StatusMessage tone="success">Guardado</StatusMessage>)
+    expect(screen.getByRole('status')).toHaveTextContent('Guardado')
+
+    rerender(<StatusMessage tone="info">Cargando…</StatusMessage>)
+    expect(screen.getByRole('status')).toHaveTextContent('Cargando…')
+  })
 })

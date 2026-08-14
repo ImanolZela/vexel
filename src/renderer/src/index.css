@@ -27,6 +27,26 @@ input[type='range'] {
   accent-color: var(--color-accent);
 }
 
+/* Buttons and the sidebar nav get a themed focus-visible ring via Tailwind
+   classes, but native form controls (checkboxes, range sliders, the format
+   <select>) have no such classes to hook and fall back to the browser's
+   default blue ring, which clashes with the palette. Match it here instead. */
+input[type='checkbox']:focus-visible,
+input[type='range']:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Tailwind's preflight constrains img/video to their container but not svg
+   (mozdevs/cssremedy deliberately excludes it). The vectorize preview injects
+   a raw <svg> at the source image's native pixel size, so without this a
+   large photo blows out the layout instead of scaling down to fit. */
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
 @keyframes screen-fade-in {
   from {
     opacity: 0;
