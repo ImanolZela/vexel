@@ -10,8 +10,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   // Disabled buttons don't receive :hover from the browser at all, so this
   // doesn't need its own disabled guard.
+  // text-on-accent (not text-bg): text-bg is only 4.14:1 against bg-accent,
+  // just under WCAG AA's 4.5:1 minimum for this text's size.
   primary:
-    'w-fit rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg hover:bg-accent/85 disabled:opacity-60',
+    'w-fit rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent hover:bg-accent/85 disabled:opacity-60',
   pill: 'rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary hover:border-text-secondary/60 hover:text-text data-[active=true]:border-accent data-[active=true]:text-text'
 }
 

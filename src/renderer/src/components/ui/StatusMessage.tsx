@@ -7,9 +7,12 @@ interface StatusMessageProps {
   children: ReactNode
 }
 
+// text-convert/text-vectorize are ~2:1 against the background — well under
+// WCAG AA's 4.5:1 for text. The *-text tokens are the same hue lightened
+// until they clear it; the base tones stay reserved for borders/backgrounds.
 const TONE_CLASSES: Record<StatusTone, string> = {
-  success: 'text-convert',
-  error: 'text-vectorize',
+  success: 'text-convert-text',
+  error: 'text-vectorize-text',
   info: 'text-text-secondary'
 }
 

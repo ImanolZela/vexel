@@ -6,13 +6,13 @@ describe('StatusMessage', () => {
   it('renders success tone with the convert accent color', () => {
     render(<StatusMessage tone="success">Guardado en out.png</StatusMessage>)
 
-    expect(screen.getByText('Guardado en out.png')).toHaveClass('text-convert')
+    expect(screen.getByText('Guardado en out.png')).toHaveClass('text-convert-text')
   })
 
   it('renders error tone with the vectorize accent color', () => {
     render(<StatusMessage tone="error">boom</StatusMessage>)
 
-    expect(screen.getByText('boom')).toHaveClass('text-vectorize')
+    expect(screen.getByText('boom')).toHaveClass('text-vectorize-text')
   })
 
   it('renders info tone with the secondary text color', () => {

@@ -28,8 +28,10 @@ function statusLabel(status: FileStatus | undefined): string {
 }
 
 function statusClassName(status: FileStatus | undefined): string {
-  if (status?.state === 'done') return 'text-convert'
-  if (status?.state === 'error') return 'text-vectorize'
+  // *-text tokens: same hue as the mode accent, lightened to actually meet
+  // WCAG AA contrast as text (see index.css).
+  if (status?.state === 'done') return 'text-convert-text'
+  if (status?.state === 'error') return 'text-vectorize-text'
   return 'text-text-secondary'
 }
 

@@ -8,6 +8,16 @@
   --color-convert: #5a5630;
   --color-text: #f5f0e8;
   --color-text-secondary: #a69b92;
+
+  /* Lightened variants of vectorize/convert for use as *text* (error/success
+   * messages) — the base tones are ~2:1 against --color-bg, well under the
+   * 4.5:1 WCAG AA minimum for normal text. Same hue, just legible; the base
+   * tones stay as-is for borders/backgrounds, where 2:1 reads fine. */
+  --color-vectorize-text: #e46543;
+  --color-convert-text: #968f50;
+  /* Button text sits on --color-accent, not --color-bg (4.14:1, just under
+   * AA). A touch darker than --color-bg, same hue, clears 4.5:1. */
+  --color-on-accent: #241c0f;
 }
 
 html,
