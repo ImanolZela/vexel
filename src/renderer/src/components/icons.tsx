@@ -94,3 +94,16 @@ export function FolderIcon({ className }: IconProps): React.JSX.Element {
     </svg>
   )
 }
+
+// A lowercase "i" in a circle — used as the hover/focus target for
+// contextual hints next to slider/checkbox labels whose meaning isn't
+// obvious from the name alone (e.g. "Suavizado").
+export function InfoIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <svg {...BASE_PROPS} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5.5" />
+      <circle cx="12" cy="7.8" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}

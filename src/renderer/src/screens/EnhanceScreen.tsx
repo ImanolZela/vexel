@@ -147,24 +147,28 @@ function EnhanceScreen(): React.JSX.Element {
 
             <Checkbox
               label="Nitidez"
+              hint="Realza bordes y detalles finos para que la imagen se vea más definida."
               checked={options.sharpen}
               onChange={(checked) => setOptions({ ...options, sharpen: checked })}
             />
 
             <Checkbox
               label="Reducción de ruido"
+              hint="Suaviza grano y artefactos de compresión, cuidando de no perder bordes."
               checked={options.denoise}
               onChange={(checked) => setOptions({ ...options, denoise: checked })}
             />
 
             <Checkbox
               label="Auto-contraste"
+              hint="Ajusta automáticamente el rango de tonos para que la imagen no se vea plana."
               checked={options.autoContrast}
               onChange={(checked) => setOptions({ ...options, autoContrast: checked })}
             />
 
             <Slider
               label="Escala"
+              hint="Factor de aumento de resolución. 2x duplica el ancho y alto de la imagen."
               value={options.scale}
               min={1}
               max={4}

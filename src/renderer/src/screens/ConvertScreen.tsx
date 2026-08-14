@@ -137,7 +137,14 @@ function ConvertScreen(): React.JSX.Element {
             </div>
 
             {usesQuality && (
-              <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
+              <Slider
+                label="Calidad"
+                hint="Más alto conserva mejor la imagen pero pesa más. 80-90 suele ser un buen punto medio."
+                value={quality}
+                min={1}
+                max={100}
+                onChange={setQuality}
+              />
             )}
 
             <Checkbox
@@ -146,6 +153,7 @@ function ConvertScreen(): React.JSX.Element {
                   ? 'Quitar fondo'
                   : 'Quitar fondo (no disponible para JPG, no soporta transparencia)'
               }
+              hint="Detecta el color de fondo por las esquinas de la imagen y lo vuelve transparente."
               checked={supportsAlpha && removeBackground}
               onChange={setRemoveBackground}
               disabled={!supportsAlpha}

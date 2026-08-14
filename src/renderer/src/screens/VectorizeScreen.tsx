@@ -134,12 +134,27 @@ function VectorizeScreen(): React.JSX.Element {
         // a wide window doesn't just leave the extra space empty.
         <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[340px_1fr]">
           <Card>
-            <Slider label="Colores" value={colors} min={2} max={16} onChange={setColors} />
+            <Slider
+              label="Colores"
+              hint="Cantidad de colores en la paleta del SVG resultante. Menos colores dan un resultado más plano y liviano."
+              value={colors}
+              min={2}
+              max={16}
+              onChange={setColors}
+            />
 
-            <Slider label="Suavizado" value={turdSize} min={0} max={10} onChange={setTurdSize} />
+            <Slider
+              label="Suavizado"
+              hint="Descarta manchas y detalles muy pequeños. Valores altos simplifican la imagen y limpian el ruido."
+              value={turdSize}
+              min={0}
+              max={10}
+              onChange={setTurdSize}
+            />
 
             <Slider
               label="Simplificar curvas"
+              hint="Qué tanto se suavizan los trazos. Valores altos generan paths más simples, con menos puntos, pero menos fieles al original."
               value={optTolerance}
               min={0.1}
               max={2}
@@ -150,6 +165,7 @@ function VectorizeScreen(): React.JSX.Element {
 
             <Checkbox
               label="Quitar fondo"
+              hint="Detecta el color de fondo por las esquinas de la imagen y lo excluye del trazado."
               checked={removeBackground}
               onChange={setRemoveBackground}
             />
