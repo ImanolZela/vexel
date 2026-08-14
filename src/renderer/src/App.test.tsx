@@ -52,9 +52,35 @@ describe('App', () => {
       render(<App />)
       const shell = document.getElementById('app-shell') as HTMLElement
 
-      fireEvent.dragOver(shell)
+      fireEvent.dragEnter(shell)
 
       expect(screen.getByText('Soltá para agregar imágenes')).toBeInTheDocument()
+    })
+
+    it('keeps the overlay up while the drag crosses internal elements', () => {
+      // dragenter/dragleave fire — and bubble — on every element boundary
+      // the pointer crosses, not just the whole shell's. A naive
+      // "hide on any dragleave" would flicker the overlay off here even
+      // though the drag never actually left the window.
+      render(<App />)
+      const shell = document.getElementById('app-shell') as HTMLElement
+      const sidebarButton = screen.getByRole('button', { name: 'Vectorizar' })
+
+      fireEvent.dragEnter(shell)
+      fireEvent.dragEnter(sidebarButton)
+      fireEvent.dragLeave(sidebarButton)
+
+      expect(screen.getByText('Soltá para agregar imágenes')).toBeInTheDocument()
+    })
+
+    it('hides the overlay once the drag actually leaves the shell', () => {
+      render(<App />)
+      const shell = document.getElementById('app-shell') as HTMLElement
+
+      fireEvent.dragEnter(shell)
+      fireEvent.dragLeave(shell)
+
+      expect(screen.queryByText('Soltá para agregar imágenes')).not.toBeInTheDocument()
     })
 
     it('adds a file dropped anywhere over the window, not just the dropzone box', () => {

@@ -10,12 +10,13 @@ import type { Mode } from './types/mode'
 
 function AppShell(): React.JSX.Element {
   const [mode, setMode] = useState<Mode>('convert')
-  const { isDragging, onDragOver, onDragLeave, onDrop } = useFileDrop()
+  const { isDragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop()
 
   return (
     <div
       id="app-shell"
       className="relative flex h-full"
+      onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
