@@ -7,6 +7,7 @@ import Checkbox from '../components/ui/Checkbox'
 import StatusMessage from '../components/ui/StatusMessage'
 import {
   FORMATS_SUPPORTING_ALPHA,
+  FORMATS_WITHOUT_QUALITY,
   IMAGE_FORMATS,
   suggestedFileName,
   type ImageFormat
@@ -41,10 +42,7 @@ function ConvertScreen(): React.JSX.Element {
   const [statuses, setStatuses] = useState<Record<string, FileStatus>>({})
 
   const supportsAlpha = FORMATS_SUPPORTING_ALPHA.includes(format)
-  // png is always encoded lossless (compressionLevel/adaptiveFiltering only,
-  // no palette quantization) and gif has no quality knob in sharp — the
-  // slider wouldn't do anything for either.
-  const usesQuality = format !== 'png' && format !== 'gif'
+  const usesQuality = !FORMATS_WITHOUT_QUALITY.includes(format)
 
   const doneCount = files.filter(
     (file) => statuses[file.path]?.state === 'done' || statuses[file.path]?.state === 'error'

@@ -62,10 +62,18 @@ export async function convertImage(options: ConvertOptions): Promise<void> {
       pipeline.avif({ effort: 6, ...(quality ? { quality } : {}) })
       break
     case 'tiff':
-      pipeline.tiff(quality ? { quality } : undefined)
+      // sharp defaults tiff to compression: 'jpeg' — meaning the "archival,
+      // lossless" format most people pick TIFF for was quietly re-encoding
+      // through lossy JPEG. deflate is real lossless compression (same
+      // zlib family as PNG) with no such surprise; zstd would compress
+      // further but this libvips build isn't compiled with it.
+      pipeline.tiff({ compression: 'deflate' })
       break
     case 'gif':
-      pipeline.gif()
+      // gif is inherently palette-limited (256 colors) — that's expected,
+      // not a hidden surprise like png/tiff's defaults were. effort just
+      // maxes out how hard it searches for the best palette/dithering.
+      pipeline.gif({ effort: 10 })
       break
   }
 

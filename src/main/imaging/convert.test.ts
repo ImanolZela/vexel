@@ -193,6 +193,31 @@ describe('convertImage', () => {
     expect(tunedSize).toBeLessThanOrEqual(defaultBuffer.length)
   })
 
+  it('encodes gif at a higher compression effort than the sharp default', async () => {
+    const sourcePath = join(dir, 'photo.png')
+    const destPath = join(dir, 'out.gif')
+    await createPhotoLikePng(sourcePath)
+
+    await convertImage({ sourcePath, destPath, format: 'gif' })
+    const tunedSize = (await stat(destPath)).size
+
+    const defaultEffortBuffer = await sharp(sourcePath).gif({ effort: 7 }).toBuffer()
+
+    expect(tunedSize).toBeLessThanOrEqual(defaultEffortBuffer.length)
+  })
+
+  it('keeps tiff pixel-exact instead of sharp default jpeg-in-tiff compression', async () => {
+    const sourcePath = join(dir, 'noisy.png')
+    const destPath = join(dir, 'out.tiff')
+    await createNoisyPng(sourcePath)
+    const sourcePixels = await sharp(sourcePath).raw().toBuffer()
+
+    await convertImage({ sourcePath, destPath, format: 'tiff' })
+    const destPixels = await sharp(destPath).raw().toBuffer()
+
+    expect(destPixels.equals(sourcePixels)).toBe(true)
+  })
+
   it('makes the detected background transparent when removeBackground is set', async () => {
     const sourcePath = join(dir, 'framed.png')
     const destPath = join(dir, 'out.png')
