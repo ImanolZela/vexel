@@ -1,4 +1,4 @@
-import { dialog, ipcMain, type BrowserWindow } from 'electron'
+import { dialog, ipcMain, shell, type BrowserWindow } from 'electron'
 import { writeFile } from 'node:fs/promises'
 
 const IMAGE_FILTERS = [
@@ -54,4 +54,10 @@ export function registerFileHandlers(getWindow: () => BrowserWindow | null): voi
       }
     }
   )
+
+  // Used by the history panel's "Mostrar en carpeta" — highlights the file
+  // in the OS file manager instead of just opening the folder blind.
+  ipcMain.handle('shell:show-in-folder', async (_event, path: string): Promise<void> => {
+    shell.showItemInFolder(path)
+  })
 }

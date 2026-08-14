@@ -37,6 +37,25 @@ export interface EnhanceRequest {
 
 export type EnhancePreviewRequest = Omit<EnhanceRequest, 'destPath'>
 
+// Mirrors main/history.ts.
+export type HistoryKind = 'convert' | 'vectorize' | 'enhance'
+
+export interface HistoryEntry {
+  id: string
+  kind: HistoryKind
+  sourceName: string
+  destPath: string
+  format?: string
+  timestamp: number
+}
+
+export type NewHistoryEntry = Omit<HistoryEntry, 'id' | 'timestamp'>
+
+// Mirrors main/settings.ts.
+export interface Settings {
+  defaultDownloadDir: string | null
+}
+
 export interface VexelAPI {
   openFiles: () => Promise<string[]>
   saveFile: (defaultName?: string) => Promise<string | null>
@@ -49,6 +68,13 @@ export interface VexelAPI {
   writeTextFile: (path: string, content: string) => Promise<WriteTextFileResult>
   enhanceImage: (options: EnhanceRequest) => Promise<ConvertResult>
   enhancePreview: (options: EnhancePreviewRequest) => Promise<EnhancePreviewResult>
+  showInFolder: (path: string) => Promise<void>
+  getHistory: () => Promise<HistoryEntry[]>
+  addHistoryEntry: (entry: NewHistoryEntry) => Promise<HistoryEntry[]>
+  removeHistoryEntry: (id: string) => Promise<HistoryEntry[]>
+  clearHistory: () => Promise<void>
+  getSettings: () => Promise<Settings>
+  updateSettings: (patch: Partial<Settings>) => Promise<Settings>
 }
 
 declare global {

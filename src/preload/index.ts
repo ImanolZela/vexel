@@ -14,7 +14,14 @@ const api: VexelAPI = {
   vectorizeImage: (options) => ipcRenderer.invoke('image:vectorize', options),
   writeTextFile: (path, content) => ipcRenderer.invoke('file:write-text', path, content),
   enhanceImage: (options) => ipcRenderer.invoke('image:enhance', options),
-  enhancePreview: (options) => ipcRenderer.invoke('image:enhance-preview', options)
+  enhancePreview: (options) => ipcRenderer.invoke('image:enhance-preview', options),
+  showInFolder: (path) => ipcRenderer.invoke('shell:show-in-folder', path),
+  getHistory: () => ipcRenderer.invoke('history:get'),
+  addHistoryEntry: (entry) => ipcRenderer.invoke('history:add', entry),
+  removeHistoryEntry: (id) => ipcRenderer.invoke('history:remove', id),
+  clearHistory: () => ipcRenderer.invoke('history:clear'),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  updateSettings: (patch) => ipcRenderer.invoke('settings:update', patch)
 }
 
 if (process.contextIsolated) {
