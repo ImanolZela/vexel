@@ -41,6 +41,10 @@ function ConvertScreen(): React.JSX.Element {
   const [statuses, setStatuses] = useState<Record<string, FileStatus>>({})
 
   const supportsAlpha = FORMATS_SUPPORTING_ALPHA.includes(format)
+  // png is always encoded lossless (compressionLevel/adaptiveFiltering only,
+  // no palette quantization) and gif has no quality knob in sharp — the
+  // slider wouldn't do anything for either.
+  const usesQuality = format !== 'png' && format !== 'gif'
 
   const doneCount = files.filter(
     (file) => statuses[file.path]?.state === 'done' || statuses[file.path]?.state === 'error'
@@ -108,7 +112,9 @@ function ConvertScreen(): React.JSX.Element {
             </select>
           </label>
 
-          <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
+          {usesQuality && (
+            <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
+          )}
 
           <Checkbox
             label={

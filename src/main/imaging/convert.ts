@@ -39,7 +39,13 @@ export async function convertImage(options: ConvertOptions): Promise<void> {
 
   switch (format) {
     case 'png':
-      pipeline.png(quality ? { quality } : undefined)
+      // PNG is a lossless format — that's the whole reason to pick it over
+      // webp/avif/jpeg. Passing the quality slider's value here (as the
+      // code used to) silently turns on palette quantization, throwing
+      // colors away without the quality slider looking like it does that
+      // for any other format. Keep every pixel exact and instead spend
+      // more effort on the (lossless) zlib compression to shrink the file.
+      pipeline.png({ compressionLevel: 9, adaptiveFiltering: true })
       break
     case 'jpeg':
       pipeline.jpeg(quality ? { quality } : undefined)
@@ -51,7 +57,9 @@ export async function convertImage(options: ConvertOptions): Promise<void> {
       pipeline.webp({ effort: 6, ...(quality ? { quality } : {}) })
       break
     case 'avif':
-      pipeline.avif(quality ? { quality } : undefined)
+      // effort 9 (max) only shaves off another ~1% over 6 for roughly 4x
+      // the encode time in testing — past the point of being worth it.
+      pipeline.avif({ effort: 6, ...(quality ? { quality } : {}) })
       break
     case 'tiff':
       pipeline.tiff(quality ? { quality } : undefined)

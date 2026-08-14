@@ -44,6 +44,29 @@ async function createNoisyPng(path: string): Promise<void> {
   await sharp(data, { raw: { width, height, channels } }).png().toFile(path)
 }
 
+async function createPhotoLikePng(path: string): Promise<void> {
+  // AVIF's block search isn't as reliably monotonic in effort as webp's —
+  // on pure high-frequency noise it can occasionally find a smaller result
+  // at a lower effort. A smoother, more photo-like gradient (with a little
+  // texture on top) is representative of real conversions and gives a
+  // stable size difference between effort levels.
+  const width = 200
+  const height = 200
+  const channels = 3
+  const data = Buffer.alloc(width * height * channels)
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const offset = (y * width + x) * channels
+      data[offset] = 128 + 100 * Math.sin(x / 12) + (((x * 7 + y * 13) % 40) - 20)
+      data[offset + 1] = 128 + 100 * Math.sin(y / 9) + (((x * 3 + y * 29) % 40) - 20)
+      data[offset + 2] = (x + y) % 256
+    }
+  }
+
+  await sharp(data, { raw: { width, height, channels } }).png().toFile(path)
+}
+
 async function createFramedPng(path: string): Promise<void> {
   const width = 12
   const height = 12
@@ -123,6 +146,51 @@ describe('convertImage', () => {
     const defaultEffortBuffer = await sharp(sourcePath).webp({ quality: 80, effort: 4 }).toBuffer()
 
     expect(tunedSize).toBeLessThanOrEqual(defaultEffortBuffer.length)
+  })
+
+  it('encodes avif at a higher compression effort than the sharp default', async () => {
+    const sourcePath = join(dir, 'photo.png')
+    const destPath = join(dir, 'out.avif')
+    await createPhotoLikePng(sourcePath)
+
+    await convertImage({ sourcePath, destPath, format: 'avif', quality: 50 })
+    const tunedSize = (await stat(destPath)).size
+
+    const defaultEffortBuffer = await sharp(sourcePath).avif({ quality: 50, effort: 4 }).toBuffer()
+
+    expect(tunedSize).toBeLessThanOrEqual(defaultEffortBuffer.length)
+  })
+
+  it('keeps png pixel-exact regardless of the quality option, unlike every lossy format', async () => {
+    const sourcePath = join(dir, 'noisy.png')
+    await createNoisyPng(sourcePath)
+    const sourcePixels = await sharp(sourcePath).raw().toBuffer()
+
+    const lowQualityPath = join(dir, 'low.png')
+    const highQualityPath = join(dir, 'high.png')
+    await convertImage({ sourcePath, destPath: lowQualityPath, format: 'png', quality: 10 })
+    await convertImage({ sourcePath, destPath: highQualityPath, format: 'png', quality: 95 })
+
+    const [lowPixels, highPixels] = await Promise.all([
+      sharp(lowQualityPath).raw().toBuffer(),
+      sharp(highQualityPath).raw().toBuffer()
+    ])
+
+    expect(lowPixels.equals(sourcePixels)).toBe(true)
+    expect(highPixels.equals(sourcePixels)).toBe(true)
+  })
+
+  it('compresses png harder than the sharp default while staying lossless', async () => {
+    const sourcePath = join(dir, 'noisy.png')
+    const destPath = join(dir, 'out.png')
+    await createNoisyPng(sourcePath)
+
+    await convertImage({ sourcePath, destPath, format: 'png' })
+    const tunedSize = (await stat(destPath)).size
+
+    const defaultBuffer = await sharp(sourcePath).png().toBuffer()
+
+    expect(tunedSize).toBeLessThanOrEqual(defaultBuffer.length)
   })
 
   it('makes the detected background transparent when removeBackground is set', async () => {
