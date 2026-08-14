@@ -141,7 +141,7 @@ function ConvertScreen(): React.JSX.Element {
               className="h-2 overflow-hidden rounded-full bg-surface"
             >
               <div
-                className="h-full bg-accent transition-all"
+                className="h-full bg-[var(--mode-accent)] transition-all"
                 style={{ width: `${(doneCount / files.length) * 100}%` }}
               />
             </div>

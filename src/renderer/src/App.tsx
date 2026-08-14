@@ -6,11 +6,12 @@ import VectorizeScreen from './screens/VectorizeScreen'
 import EnhanceScreen from './screens/EnhanceScreen'
 import { FilesProvider } from './state/FilesContext'
 import { useFileDrop } from './hooks/useFileDrop'
-import type { Mode } from './types/mode'
+import { MODES, type Mode } from './types/mode'
 
 function AppShell(): React.JSX.Element {
   const [mode, setMode] = useState<Mode>('convert')
   const { isDragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop()
+  const modeInfo = MODES.find((m) => m.id === mode)
 
   return (
     <div
@@ -20,6 +21,12 @@ function AppShell(): React.JSX.Element {
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
+      style={
+        {
+          '--mode-accent': modeInfo?.accent ?? 'var(--color-accent)',
+          '--mode-on-accent': modeInfo?.onAccent ?? 'var(--color-on-accent)'
+        } as React.CSSProperties
+      }
     >
       <Sidebar active={mode} onSelect={setMode} />
       <main className="flex-1 overflow-y-auto px-10 py-8">

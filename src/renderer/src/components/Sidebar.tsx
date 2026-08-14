@@ -16,7 +16,7 @@ function Sidebar({ active, onSelect }: SidebarProps): React.JSX.Element {
               type="button"
               data-active={mode.id === active}
               style={{ '--mode-accent': mode.accent } as React.CSSProperties}
-              className={`w-full cursor-pointer rounded-lg border-l-[3px] px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              className={`w-full cursor-pointer rounded-lg border-l-[3px] px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)] ${
                 mode.id === active
                   ? 'border-l-[var(--mode-accent)] bg-text-secondary/10 text-text'
                   : 'border-transparent text-text-secondary hover:bg-text-secondary/10 hover:text-text'

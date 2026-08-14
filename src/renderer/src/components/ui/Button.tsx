@@ -10,11 +10,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   // Disabled buttons don't receive :hover from the browser at all, so this
   // doesn't need its own disabled guard.
-  // text-on-accent (not text-bg): text-bg is only 4.14:1 against bg-accent,
-  // just under WCAG AA's 4.5:1 minimum for this text's size.
+  // bg/text via --mode-accent/--mode-on-accent (set on <main> per active
+  // screen — see App.tsx): Convertir themes olive, Vectorizar terracota,
+  // Mejorar stays neutral orange. Each mode's onAccent is whichever of
+  // dark/light text actually clears WCAG AA against that mode's accent —
+  // a single fixed color fails against at least one of the three.
   primary:
-    'w-fit rounded-lg bg-accent px-4 py-2 text-sm font-medium text-on-accent hover:bg-accent/85 disabled:opacity-60',
-  pill: 'rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary hover:border-text-secondary/60 hover:text-text data-[active=true]:border-accent data-[active=true]:text-text'
+    'w-fit rounded-lg bg-[var(--mode-accent)] px-4 py-2 text-sm font-medium text-[var(--mode-on-accent)] hover:bg-[var(--mode-accent)]/85 disabled:opacity-60',
+  pill: 'rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary hover:border-text-secondary/60 hover:text-text data-[active=true]:border-[var(--mode-accent)] data-[active=true]:text-text'
 }
 
 function Button({
@@ -28,7 +31,7 @@ function Button({
     <button
       type={type}
       data-active={active}
-      className={`cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${VARIANT_CLASSES[variant]} ${className}`.trim()}
+      className={`cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)] ${VARIANT_CLASSES[variant]} ${className}`.trim()}
       {...rest}
     />
   )
