@@ -8,8 +8,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: 'w-fit rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg disabled:opacity-60',
-  pill: 'rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary data-[active=true]:border-accent data-[active=true]:text-text'
+  // Disabled buttons don't receive :hover from the browser at all, so this
+  // doesn't need its own disabled guard.
+  primary:
+    'w-fit rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg hover:bg-accent/85 disabled:opacity-60',
+  pill: 'rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary hover:border-text-secondary/60 hover:text-text data-[active=true]:border-accent data-[active=true]:text-text'
 }
 
 function Button({

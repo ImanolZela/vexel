@@ -7,6 +7,7 @@ import Checkbox from '../components/ui/Checkbox'
 import StatusMessage from '../components/ui/StatusMessage'
 import { suggestedEnhancedFileName } from '../lib/enhancedFileName'
 import { ENHANCE_PRESETS } from '../lib/enhancePresets'
+import { THUMBNAIL_SIZE_CLASSES } from '../lib/thumbnailSize'
 
 const DEBOUNCE_MS = 400
 
@@ -146,14 +147,19 @@ function EnhanceScreen(): React.JSX.Element {
             onChange={(value) => setOptions({ ...options, scale: value })}
           />
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-end gap-3">
             <div>
               <p className="mb-1 text-xs text-text-secondary">Antes</p>
-              <Thumbnail path={source.path} alt={`${source.name} original`} />
+              <Thumbnail path={source.path} alt={`${source.name} original`} size="md" />
             </div>
+            <span aria-hidden="true" className="mb-2 text-lg text-text-secondary">
+              →
+            </span>
             <div>
               <p className="mb-1 text-xs text-text-secondary">Después</p>
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg">
+              <div
+                className={`flex ${THUMBNAIL_SIZE_CLASSES.md} shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg`}
+              >
                 {afterThumbnail && (
                   <img
                     src={afterThumbnail}

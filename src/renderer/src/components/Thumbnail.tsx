@@ -1,15 +1,10 @@
 import { useThumbnail } from '../hooks/useThumbnail'
-
-const SIZE_CLASSES = {
-  sm: 'h-12 w-12',
-  md: 'h-16 w-16',
-  lg: 'h-24 w-24'
-} as const
+import { THUMBNAIL_SIZE_CLASSES, type ThumbnailSize } from '../lib/thumbnailSize'
 
 interface ThumbnailProps {
   path: string | null
   alt: string
-  size?: keyof typeof SIZE_CLASSES
+  size?: ThumbnailSize
 }
 
 function Thumbnail({ path, alt, size = 'sm' }: ThumbnailProps): React.JSX.Element {
@@ -17,7 +12,7 @@ function Thumbnail({ path, alt, size = 'sm' }: ThumbnailProps): React.JSX.Elemen
 
   return (
     <div
-      className={`flex ${SIZE_CLASSES[size]} shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg`}
+      className={`flex ${THUMBNAIL_SIZE_CLASSES[size]} shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg`}
     >
       {dataUrl && <img src={dataUrl} alt={alt} className="h-full w-full object-cover" />}
     </div>

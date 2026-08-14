@@ -12,6 +12,7 @@ import {
   suggestedFileName,
   type ImageFormat
 } from '../lib/imageFormat'
+import { THUMBNAIL_SIZE_CLASSES } from '../lib/thumbnailSize'
 
 type FileStatus =
   | { state: 'pending' }
@@ -157,15 +158,11 @@ function ConvertScreen(): React.JSX.Element {
                     <span aria-hidden="true" className="text-lg text-text-secondary">
                       →
                     </span>
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg">
-                      {status?.state === 'done' && (
-                        <Thumbnail
-                          path={status.destPath}
-                          alt={`${file.name} convertido`}
-                          size="md"
-                        />
-                      )}
-                    </div>
+                    {status?.state === 'done' ? (
+                      <Thumbnail path={status.destPath} alt={`${file.name} convertido`} size="md" />
+                    ) : (
+                      <div className={`${THUMBNAIL_SIZE_CLASSES.md} shrink-0 rounded-md bg-bg`} />
+                    )}
                     <span className="truncate text-text">{file.name}</span>
                   </div>
                   <span className={statusClassName(status)}>{statusLabel(status)}</span>
