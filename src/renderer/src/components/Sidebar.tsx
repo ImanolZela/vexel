@@ -1,4 +1,5 @@
 import { MODES, type Mode } from '../types/mode'
+import { MODE_ICONS } from '../lib/modeIcons'
 
 interface SidebarProps {
   active: Mode
@@ -10,23 +11,27 @@ function Sidebar({ active, onSelect }: SidebarProps): React.JSX.Element {
     <nav className="w-56 shrink-0 bg-surface border-r border-text-secondary/20 flex flex-col p-4">
       <div className="font-bold text-lg text-accent px-3 pb-5">Vexel</div>
       <ul className="flex flex-col gap-1 list-none m-0 p-0">
-        {MODES.map((mode) => (
-          <li key={mode.id}>
-            <button
-              type="button"
-              data-active={mode.id === active}
-              style={{ '--mode-accent': mode.accent } as React.CSSProperties}
-              className={`w-full cursor-pointer rounded-lg border-l-[3px] px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)] ${
-                mode.id === active
-                  ? 'border-l-[var(--mode-accent)] bg-text-secondary/10 text-text'
-                  : 'border-transparent text-text-secondary hover:bg-text-secondary/10 hover:text-text'
-              }`}
-              onClick={() => onSelect(mode.id)}
-            >
-              {mode.label}
-            </button>
-          </li>
-        ))}
+        {MODES.map((mode) => {
+          const Icon = MODE_ICONS[mode.id]
+          return (
+            <li key={mode.id}>
+              <button
+                type="button"
+                data-active={mode.id === active}
+                style={{ '--mode-accent': mode.accent } as React.CSSProperties}
+                className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg border-l-[3px] px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)] ${
+                  mode.id === active
+                    ? 'border-l-[var(--mode-accent)] bg-text-secondary/10 text-text'
+                    : 'border-transparent text-text-secondary hover:bg-text-secondary/10 hover:text-text'
+                }`}
+                onClick={() => onSelect(mode.id)}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                {mode.label}
+              </button>
+            </li>
+          )
+        })}
       </ul>
     </nav>
   )

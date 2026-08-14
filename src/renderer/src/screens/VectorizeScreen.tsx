@@ -3,7 +3,9 @@ import { useFiles } from '../hooks/useFiles'
 import Button from '../components/ui/Button'
 import Slider from '../components/ui/Slider'
 import Checkbox from '../components/ui/Checkbox'
+import Card from '../components/ui/Card'
 import StatusMessage from '../components/ui/StatusMessage'
+import { VectorizeIcon } from '../components/icons'
 import { suggestedSvgFileName } from '../lib/svgFileName'
 import { formatBytes } from '../lib/formatBytes'
 
@@ -87,45 +89,53 @@ function VectorizeScreen(): React.JSX.Element {
 
   return (
     <section className="max-w-2xl" data-testid="screen-vectorize">
-      <h1 className="mt-0 mb-2 text-2xl font-semibold text-text">Vectorizar</h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <VectorizeIcon className="h-6 w-6 shrink-0 text-[var(--mode-accent)]" />
+        <h1 className="m-0 text-2xl font-semibold text-text">Vectorizar</h1>
+      </div>
       <p className="mb-6 text-text-secondary">
         Convertí tus imágenes raster en paths vectoriales reales.
       </p>
 
       {!source && (
-        <StatusMessage tone="info">Seleccioná un archivo arriba para vectorizarlo.</StatusMessage>
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-text-secondary/20 py-10 text-center">
+          <VectorizeIcon className="h-8 w-8 text-text-secondary/50" />
+          <StatusMessage tone="info">Seleccioná un archivo arriba para vectorizarlo.</StatusMessage>
+        </div>
       )}
 
       {source && (
         <div className="flex flex-col gap-4">
-          <Slider label="Colores" value={colors} min={2} max={16} onChange={setColors} />
+          <Card>
+            <Slider label="Colores" value={colors} min={2} max={16} onChange={setColors} />
 
-          <Slider label="Suavizado" value={turdSize} min={0} max={10} onChange={setTurdSize} />
+            <Slider label="Suavizado" value={turdSize} min={0} max={10} onChange={setTurdSize} />
 
-          <Slider
-            label="Simplificar curvas"
-            value={optTolerance}
-            min={0.1}
-            max={2}
-            step={0.1}
-            formatValue={(value) => value.toFixed(1)}
-            onChange={setOptTolerance}
-          />
+            <Slider
+              label="Simplificar curvas"
+              value={optTolerance}
+              min={0.1}
+              max={2}
+              step={0.1}
+              formatValue={(value) => value.toFixed(1)}
+              onChange={setOptTolerance}
+            />
 
-          <Checkbox
-            label="Quitar fondo"
-            checked={removeBackground}
-            onChange={setRemoveBackground}
-          />
+            <Checkbox
+              label="Quitar fondo"
+              checked={removeBackground}
+              onChange={setRemoveBackground}
+            />
+          </Card>
 
           {isLoading && <StatusMessage tone="info">Vectorizando…</StatusMessage>}
           {error && <StatusMessage tone="error">{error}</StatusMessage>}
 
           {svg && (
-            <>
+            <Card>
               <div
                 data-testid="vectorize-preview"
-                className="rounded-lg bg-surface p-4"
+                className="rounded-lg bg-bg p-4"
                 dangerouslySetInnerHTML={{ __html: svg }}
               />
 
@@ -143,7 +153,7 @@ function VectorizeScreen(): React.JSX.Element {
               {exportStatus.type === 'error' && (
                 <StatusMessage tone="error">{exportStatus.message}</StatusMessage>
               )}
-            </>
+            </Card>
           )}
         </div>
       )}

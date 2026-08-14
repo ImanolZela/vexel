@@ -1,5 +1,6 @@
 import { useFiles } from '../hooks/useFiles'
 import Button from './ui/Button'
+import { UploadIcon } from './icons'
 
 function fileNameFromPath(path: string): string {
   return path.split(/[\\/]/).pop() ?? path
@@ -15,6 +16,7 @@ function Dropzone(): React.JSX.Element {
 
   return (
     <div className="mb-6 rounded-xl border-2 border-dashed border-text-secondary/30 p-6 text-center">
+      <UploadIcon className="mx-auto mb-2 h-6 w-6 text-text-secondary/60" />
       <p className="mb-3 text-text-secondary">Arrastrá imágenes a cualquier parte de la ventana</p>
       <Button onClick={handleBrowse}>Seleccionar archivos</Button>
 
@@ -31,7 +33,7 @@ function Dropzone(): React.JSX.Element {
                 title={`Quitar ${file.name}`}
                 aria-label={`Quitar ${file.name}`}
                 onClick={() => removeFile(file.path)}
-                className="cursor-pointer text-text-secondary hover:text-vectorize focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                className="cursor-pointer text-text-secondary hover:text-vectorize-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)]"
               >
                 ×
               </button>

@@ -4,7 +4,9 @@ import Thumbnail from '../components/Thumbnail'
 import Button from '../components/ui/Button'
 import Slider from '../components/ui/Slider'
 import Checkbox from '../components/ui/Checkbox'
+import Card from '../components/ui/Card'
 import StatusMessage from '../components/ui/StatusMessage'
+import { ConvertIcon } from '../components/icons'
 import {
   FORMATS_SUPPORTING_ALPHA,
   FORMATS_WITHOUT_QUALITY,
@@ -85,67 +87,79 @@ function ConvertScreen(): React.JSX.Element {
 
   return (
     <section className="max-w-2xl" data-testid="screen-convert">
-      <h1 className="mt-0 mb-2 text-2xl font-semibold text-text">Convertir</h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <ConvertIcon className="h-6 w-6 shrink-0 text-[var(--mode-accent)]" />
+        <h1 className="m-0 text-2xl font-semibold text-text">Convertir</h1>
+      </div>
       <p className="mb-6 text-text-secondary">
         Convertí tus imágenes entre PNG, JPG, WEBP, AVIF, TIFF y GIF.
       </p>
 
       {files.length === 0 && (
-        <StatusMessage tone="info">
-          Seleccioná uno o más archivos arriba para convertirlos.
-        </StatusMessage>
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-text-secondary/20 py-10 text-center">
+          <ConvertIcon className="h-8 w-8 text-text-secondary/50" />
+          <StatusMessage tone="info">
+            Seleccioná uno o más archivos arriba para convertirlos.
+          </StatusMessage>
+        </div>
       )}
 
       {files.length > 0 && (
         <div className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-sm text-text-secondary">
-            Formato destino
-            <select
-              value={format}
-              onChange={(event) => setFormat(event.target.value as ImageFormat)}
-              className="rounded-lg bg-surface px-3 py-2 text-text"
-            >
-              {IMAGE_FORMATS.map((option) => (
-                <option key={option} value={option}>
-                  {option.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Card>
+            <label className="flex flex-col gap-1 text-sm text-text-secondary">
+              Formato destino
+              <select
+                value={format}
+                onChange={(event) => setFormat(event.target.value as ImageFormat)}
+                className="rounded-lg bg-surface px-3 py-2 text-text"
+              >
+                {IMAGE_FORMATS.map((option) => (
+                  <option key={option} value={option}>
+                    {option.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          {usesQuality && (
-            <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
-          )}
+            {usesQuality && (
+              <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
+            )}
 
-          <Checkbox
-            label={
-              supportsAlpha
-                ? 'Quitar fondo'
-                : 'Quitar fondo (no disponible para JPG, no soporta transparencia)'
-            }
-            checked={supportsAlpha && removeBackground}
-            onChange={setRemoveBackground}
-            disabled={!supportsAlpha}
-          />
+            <Checkbox
+              label={
+                supportsAlpha
+                  ? 'Quitar fondo'
+                  : 'Quitar fondo (no disponible para JPG, no soporta transparencia)'
+              }
+              checked={supportsAlpha && removeBackground}
+              onChange={setRemoveBackground}
+              disabled={!supportsAlpha}
+            />
 
-          <Button onClick={handleConvertAll} disabled={isConverting}>
-            {isConverting ? 'Convirtiendo…' : `Convertir todo (${files.length})`}
-          </Button>
+            <Button onClick={handleConvertAll} disabled={isConverting}>
+              {isConverting ? 'Convirtiendo…' : `Convertir todo (${files.length})`}
+            </Button>
 
-          {isConverting && (
-            <div
-              role="progressbar"
-              aria-valuenow={doneCount}
-              aria-valuemin={0}
-              aria-valuemax={files.length}
-              className="h-2 overflow-hidden rounded-full bg-surface"
-            >
+            {isConverting && (
               <div
-                className="h-full bg-[var(--mode-accent)] transition-all"
-                style={{ width: `${(doneCount / files.length) * 100}%` }}
-              />
-            </div>
-          )}
+                role="progressbar"
+                aria-valuenow={doneCount}
+                aria-valuemin={0}
+                aria-valuemax={files.length}
+                className="h-2 overflow-hidden rounded-full bg-bg"
+              >
+                <div
+                  className="h-full bg-[var(--mode-accent)] transition-all"
+                  style={{ width: `${(doneCount / files.length) * 100}%` }}
+                />
+              </div>
+            )}
+          </Card>
+
+          <p className="mb-0 text-xs font-medium text-text-secondary uppercase">
+            Archivos ({files.length})
+          </p>
 
           <ul className="flex flex-col gap-3">
             {files.map((file) => {

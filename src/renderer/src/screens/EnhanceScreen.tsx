@@ -4,7 +4,9 @@ import Thumbnail from '../components/Thumbnail'
 import Button from '../components/ui/Button'
 import Slider from '../components/ui/Slider'
 import Checkbox from '../components/ui/Checkbox'
+import Card from '../components/ui/Card'
 import StatusMessage from '../components/ui/StatusMessage'
+import { EnhanceIcon } from '../components/icons'
 import { suggestedEnhancedFileName } from '../lib/enhancedFileName'
 import { ENHANCE_PRESETS } from '../lib/enhancePresets'
 import { THUMBNAIL_SIZE_CLASSES } from '../lib/thumbnailSize'
@@ -95,95 +97,105 @@ function EnhanceScreen(): React.JSX.Element {
 
   return (
     <section className="max-w-2xl" data-testid="screen-enhance">
-      <h1 className="mt-0 mb-2 text-2xl font-semibold text-text">Mejorar</h1>
+      <div className="mb-2 flex items-center gap-2.5">
+        <EnhanceIcon className="h-6 w-6 shrink-0 text-[var(--mode-accent)]" />
+        <h1 className="m-0 text-2xl font-semibold text-text">Mejorar</h1>
+      </div>
       <p className="mb-6 text-text-secondary">
         Nitidez, reducción de ruido, auto-contraste y upscale sin depender de la nube.
       </p>
 
       {!source && (
-        <StatusMessage tone="info">Seleccioná un archivo arriba para mejorarlo.</StatusMessage>
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-text-secondary/20 py-10 text-center">
+          <EnhanceIcon className="h-8 w-8 text-text-secondary/50" />
+          <StatusMessage tone="info">Seleccioná un archivo arriba para mejorarlo.</StatusMessage>
+        </div>
       )}
 
       {source && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            {ENHANCE_PRESETS.map((preset) => (
-              <Button
-                key={preset.id}
-                variant="pill"
-                active={isActivePreset(options, preset.options)}
-                onClick={() => setOptions(preset.options)}
-              >
-                {preset.label}
-              </Button>
-            ))}
-          </div>
-
-          <Checkbox
-            label="Nitidez"
-            checked={options.sharpen}
-            onChange={(checked) => setOptions({ ...options, sharpen: checked })}
-          />
-
-          <Checkbox
-            label="Reducción de ruido"
-            checked={options.denoise}
-            onChange={(checked) => setOptions({ ...options, denoise: checked })}
-          />
-
-          <Checkbox
-            label="Auto-contraste"
-            checked={options.autoContrast}
-            onChange={(checked) => setOptions({ ...options, autoContrast: checked })}
-          />
-
-          <Slider
-            label="Escala"
-            value={options.scale}
-            min={1}
-            max={4}
-            step={0.5}
-            formatValue={(value) => `${value.toFixed(1)}x`}
-            onChange={(value) => setOptions({ ...options, scale: value })}
-          />
-
-          <div className="flex items-end gap-3">
-            <div>
-              <p className="mb-1 text-xs text-text-secondary">Antes</p>
-              <Thumbnail path={source.path} alt={`${source.name} original`} size="md" />
+          <Card>
+            <div className="flex flex-wrap gap-2">
+              {ENHANCE_PRESETS.map((preset) => (
+                <Button
+                  key={preset.id}
+                  variant="pill"
+                  active={isActivePreset(options, preset.options)}
+                  onClick={() => setOptions(preset.options)}
+                >
+                  {preset.label}
+                </Button>
+              ))}
             </div>
-            <span aria-hidden="true" className="mb-2 text-lg text-text-secondary">
-              →
-            </span>
-            <div>
-              <p className="mb-1 text-xs text-text-secondary">Después</p>
-              <div
-                className={`flex ${THUMBNAIL_SIZE_CLASSES.md} shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg`}
-              >
-                {afterThumbnail && (
-                  <img
-                    src={afterThumbnail}
-                    alt={`${source.name} mejorado`}
-                    className="h-full w-full object-cover"
-                  />
-                )}
+
+            <Checkbox
+              label="Nitidez"
+              checked={options.sharpen}
+              onChange={(checked) => setOptions({ ...options, sharpen: checked })}
+            />
+
+            <Checkbox
+              label="Reducción de ruido"
+              checked={options.denoise}
+              onChange={(checked) => setOptions({ ...options, denoise: checked })}
+            />
+
+            <Checkbox
+              label="Auto-contraste"
+              checked={options.autoContrast}
+              onChange={(checked) => setOptions({ ...options, autoContrast: checked })}
+            />
+
+            <Slider
+              label="Escala"
+              value={options.scale}
+              min={1}
+              max={4}
+              step={0.5}
+              formatValue={(value) => `${value.toFixed(1)}x`}
+              onChange={(value) => setOptions({ ...options, scale: value })}
+            />
+          </Card>
+
+          <Card>
+            <div className="flex items-end gap-3">
+              <div>
+                <p className="mb-1 text-xs text-text-secondary">Antes</p>
+                <Thumbnail path={source.path} alt={`${source.name} original`} size="md" />
+              </div>
+              <span aria-hidden="true" className="mb-2 text-lg text-text-secondary">
+                →
+              </span>
+              <div>
+                <p className="mb-1 text-xs text-text-secondary">Después</p>
+                <div
+                  className={`flex ${THUMBNAIL_SIZE_CLASSES.md} shrink-0 items-center justify-center overflow-hidden rounded-md bg-bg`}
+                >
+                  {afterThumbnail && (
+                    <img
+                      src={afterThumbnail}
+                      alt={`${source.name} mejorado`}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {isLoading && <StatusMessage tone="info">Generando preview…</StatusMessage>}
-          {previewError && <StatusMessage tone="error">{previewError}</StatusMessage>}
+            {isLoading && <StatusMessage tone="info">Generando preview…</StatusMessage>}
+            {previewError && <StatusMessage tone="error">{previewError}</StatusMessage>}
 
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Guardando…' : 'Guardar'}
-          </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Guardando…' : 'Guardar'}
+            </Button>
 
-          {saveStatus.type === 'success' && (
-            <StatusMessage tone="success">Guardado en {saveStatus.path}</StatusMessage>
-          )}
-          {saveStatus.type === 'error' && (
-            <StatusMessage tone="error">{saveStatus.message}</StatusMessage>
-          )}
+            {saveStatus.type === 'success' && (
+              <StatusMessage tone="success">Guardado en {saveStatus.path}</StatusMessage>
+            )}
+            {saveStatus.type === 'error' && (
+              <StatusMessage tone="error">{saveStatus.message}</StatusMessage>
+            )}
+          </Card>
         </div>
       )}
     </section>
