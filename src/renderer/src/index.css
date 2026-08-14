@@ -37,9 +37,55 @@ body {
   --mode-on-accent: var(--color-on-accent);
 }
 
-input[type='checkbox'],
-input[type='range'] {
+input[type='checkbox'] {
   accent-color: var(--mode-accent);
+}
+
+/* Custom range track: the native one only colors the thumb via accent-color,
+   leaving the track flat gray with no sense of "how far" the value is at a
+   glance. Slider.tsx paints the filled portion via an inline gradient on
+   this same background, computed from the current value. */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--mode-accent);
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+
+input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--mode-accent);
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+
+input[type='range']:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Buttons and the sidebar nav get a themed focus-visible ring via Tailwind

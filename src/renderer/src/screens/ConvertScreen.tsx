@@ -107,20 +107,21 @@ function ConvertScreen(): React.JSX.Element {
       {files.length > 0 && (
         <div className="flex flex-col gap-4">
           <Card>
-            <label className="flex flex-col gap-1 text-sm text-text-secondary">
-              Formato destino
-              <select
-                value={format}
-                onChange={(event) => setFormat(event.target.value as ImageFormat)}
-                className="rounded-lg bg-surface px-3 py-2 text-text"
-              >
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm text-text-secondary">Formato destino</span>
+              <div className="flex flex-wrap gap-2">
                 {IMAGE_FORMATS.map((option) => (
-                  <option key={option} value={option}>
+                  <Button
+                    key={option}
+                    variant="pill"
+                    active={format === option}
+                    onClick={() => setFormat(option)}
+                  >
                     {option.toUpperCase()}
-                  </option>
+                  </Button>
                 ))}
-              </select>
-            </label>
+              </div>
+            </div>
 
             {usesQuality && (
               <Slider label="Calidad" value={quality} min={1} max={100} onChange={setQuality} />
@@ -142,50 +143,63 @@ function ConvertScreen(): React.JSX.Element {
             </Button>
 
             {isConverting && (
-              <div
-                role="progressbar"
-                aria-valuenow={doneCount}
-                aria-valuemin={0}
-                aria-valuemax={files.length}
-                className="h-2 overflow-hidden rounded-full bg-bg"
-              >
+              <div className="flex items-center gap-3">
                 <div
-                  className="h-full bg-[var(--mode-accent)] transition-all"
-                  style={{ width: `${(doneCount / files.length) * 100}%` }}
-                />
+                  role="progressbar"
+                  aria-valuenow={doneCount}
+                  aria-valuemin={0}
+                  aria-valuemax={files.length}
+                  className="h-2 flex-1 overflow-hidden rounded-full bg-bg"
+                >
+                  <div
+                    className="h-full bg-[var(--mode-accent)] transition-all"
+                    style={{ width: `${(doneCount / files.length) * 100}%` }}
+                  />
+                </div>
+                <span className="w-10 shrink-0 text-right text-xs text-text-secondary">
+                  {Math.round((doneCount / files.length) * 100)}%
+                </span>
               </div>
             )}
           </Card>
 
-          <p className="mb-0 text-xs font-medium text-text-secondary uppercase">
-            Archivos ({files.length})
-          </p>
+          <Card className="gap-3">
+            <p className="mb-0 text-xs font-medium text-text-secondary uppercase">
+              Archivos ({files.length})
+            </p>
 
-          <ul className="flex flex-col gap-3">
-            {files.map((file) => {
-              const status = statuses[file.path]
-              return (
-                <li
-                  key={file.path}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-surface px-3 py-2 text-sm"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <Thumbnail path={file.path} alt={file.name} size="md" />
-                    <span aria-hidden="true" className="text-lg text-text-secondary">
-                      →
-                    </span>
-                    {status?.state === 'done' ? (
-                      <Thumbnail path={status.destPath} alt={`${file.name} convertido`} size="md" />
-                    ) : (
-                      <div className={`${THUMBNAIL_SIZE_CLASSES.md} shrink-0 rounded-md bg-bg`} />
-                    )}
-                    <span className="truncate text-text">{file.name}</span>
-                  </div>
-                  <span className={statusClassName(status)}>{statusLabel(status)}</span>
-                </li>
-              )
-            })}
-          </ul>
+            <ul className="flex flex-col gap-3">
+              {files.map((file) => {
+                const status = statuses[file.path]
+                return (
+                  <li
+                    key={file.path}
+                    className="flex items-center justify-between gap-3 rounded-lg bg-bg px-3 py-2 text-sm"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Thumbnail path={file.path} alt={file.name} size="md" />
+                      <span aria-hidden="true" className="text-lg text-text-secondary">
+                        →
+                      </span>
+                      {status?.state === 'done' ? (
+                        <Thumbnail
+                          path={status.destPath}
+                          alt={`${file.name} convertido`}
+                          size="md"
+                        />
+                      ) : (
+                        <div
+                          className={`${THUMBNAIL_SIZE_CLASSES.md} shrink-0 rounded-md bg-surface`}
+                        />
+                      )}
+                      <span className="truncate text-text">{file.name}</span>
+                    </div>
+                    <span className={statusClassName(status)}>{statusLabel(status)}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </Card>
         </div>
       )}
     </section>

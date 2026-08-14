@@ -52,7 +52,7 @@ describe('ConvertScreen', () => {
     const user = userEvent.setup()
     renderWithFiles([CAT, DOG])
 
-    await user.selectOptions(screen.getByRole('combobox'), 'webp')
+    await user.click(screen.getByRole('button', { name: 'WEBP' }))
     await user.click(screen.getByRole('button', { name: 'Convertir todo (2)' }))
 
     expect(window.api.convertImage).toHaveBeenCalledWith({
@@ -116,7 +116,7 @@ describe('ConvertScreen', () => {
     const user = userEvent.setup()
     renderWithFiles([CAT])
 
-    await user.selectOptions(screen.getByRole('combobox'), 'jpeg')
+    await user.click(screen.getByRole('button', { name: 'JPEG' }))
 
     expect(screen.getByLabelText(/Quitar fondo/)).toBeDisabled()
 

@@ -17,7 +17,10 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   // a single fixed color fails against at least one of the three.
   primary:
     'w-fit rounded-lg bg-[var(--mode-accent)] px-4 py-2 text-sm font-medium text-[var(--mode-on-accent)] hover:bg-[var(--mode-accent)]/85 disabled:opacity-60',
-  pill: 'rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary hover:border-text-secondary/60 hover:text-text data-[active=true]:border-[var(--mode-accent)] data-[active=true]:text-text'
+  // Filled (not just outlined) when active/selected — used for single-select
+  // groups (format picker, enhance presets) where it should be obvious at a
+  // glance which one is picked, not just a subtle border color change.
+  pill: 'rounded-full border border-text-secondary/30 px-3 py-1 text-sm text-text-secondary hover:border-text-secondary/60 hover:text-text data-[active=true]:border-[var(--mode-accent)] data-[active=true]:bg-[var(--mode-accent)] data-[active=true]:text-[var(--mode-on-accent)]'
 }
 
 function Button({
@@ -31,7 +34,7 @@ function Button({
     <button
       type={type}
       data-active={active}
-      className={`cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)] ${VARIANT_CLASSES[variant]} ${className}`.trim()}
+      className={`cursor-pointer transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mode-accent)] ${VARIANT_CLASSES[variant]} ${className}`.trim()}
       {...rest}
     />
   )
