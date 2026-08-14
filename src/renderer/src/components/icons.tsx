@@ -61,3 +61,36 @@ export function UploadIcon({ className }: IconProps): React.JSX.Element {
     </svg>
   )
 }
+
+// Sidebar trigger for the history panel.
+export function HistoryIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <svg {...BASE_PROPS} className={className} aria-hidden="true">
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 4v4.5H7.5" />
+      <path d="M12 8v4l3 2" />
+    </svg>
+  )
+}
+
+// Sidebar trigger for the settings panel — a simplified gear: a hub circle
+// with six radial ticks, safer to hand-author correctly than a full
+// interlocking gear outline.
+export function SettingsIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <svg {...BASE_PROPS} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M21 12h2M16.5 19.79l1 1.74M7.5 19.79l-1 1.74M3 12H1M7.5 4.21l-1-1.74M16.5 4.21l1-1.74" />
+    </svg>
+  )
+}
+
+// Small "x" for removing a single history entry, and a folder glyph for
+// "show this file in its folder".
+export function FolderIcon({ className }: IconProps): React.JSX.Element {
+  return (
+    <svg {...BASE_PROPS} className={className} aria-hidden="true">
+      <path d="M3 6a1 1 0 0 1 1-1h4l2 2h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" />
+    </svg>
+  )
+}

@@ -17,7 +17,14 @@ if (typeof window !== 'undefined') {
       enhanceImage: vi.fn().mockResolvedValue({ ok: true }),
       enhancePreview: vi
         .fn()
-        .mockResolvedValue({ ok: true, thumbnail: 'data:image/webp;base64,abc' })
+        .mockResolvedValue({ ok: true, thumbnail: 'data:image/webp;base64,abc' }),
+      showInFolder: vi.fn().mockResolvedValue(undefined),
+      getHistory: vi.fn().mockResolvedValue([]),
+      addHistoryEntry: vi.fn().mockResolvedValue([]),
+      removeHistoryEntry: vi.fn().mockResolvedValue([]),
+      clearHistory: vi.fn().mockResolvedValue(undefined),
+      getSettings: vi.fn().mockResolvedValue({ defaultDownloadDir: null }),
+      updateSettings: vi.fn().mockResolvedValue({ defaultDownloadDir: null })
     }
   })
 }

@@ -1,12 +1,20 @@
 import { MODES, type Mode } from '../types/mode'
 import { MODE_ICONS } from '../lib/modeIcons'
+import { HistoryIcon, SettingsIcon } from './icons'
 
 interface SidebarProps {
   active: Mode
   onSelect: (mode: Mode) => void
+  onOpenHistory: () => void
+  onOpenSettings: () => void
 }
 
-function Sidebar({ active, onSelect }: SidebarProps): React.JSX.Element {
+function Sidebar({
+  active,
+  onSelect,
+  onOpenHistory,
+  onOpenSettings
+}: SidebarProps): React.JSX.Element {
   return (
     <nav className="w-56 shrink-0 bg-surface border-r border-text-secondary/20 flex flex-col p-4">
       <div className="font-bold text-lg text-accent px-3 pb-5">Vexel</div>
@@ -37,6 +45,25 @@ function Sidebar({ active, onSelect }: SidebarProps): React.JSX.Element {
           )
         })}
       </ul>
+
+      <div className="mt-auto flex flex-col gap-1 border-t border-text-secondary/10 pt-3">
+        <button
+          type="button"
+          onClick={onOpenHistory}
+          className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-text-secondary transition-colors hover:bg-text-secondary/10 hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <HistoryIcon className="h-4 w-4 shrink-0" />
+          Historial
+        </button>
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-text-secondary transition-colors hover:bg-text-secondary/10 hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <SettingsIcon className="h-4 w-4 shrink-0" />
+          Configuración
+        </button>
+      </div>
     </nav>
   )
 }

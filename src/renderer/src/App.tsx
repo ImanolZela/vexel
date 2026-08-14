@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Sidebar from './components/Sidebar'
 import Dropzone from './components/Dropzone'
+import HistoryPanel from './components/HistoryPanel'
+import SettingsPanel from './components/SettingsPanel'
 import ConvertScreen from './screens/ConvertScreen'
 import VectorizeScreen from './screens/VectorizeScreen'
 import EnhanceScreen from './screens/EnhanceScreen'
@@ -8,8 +10,11 @@ import { FilesProvider } from './state/FilesContext'
 import { useFileDrop } from './hooks/useFileDrop'
 import { MODES, type Mode } from './types/mode'
 
+type OverlayPanel = 'none' | 'history' | 'settings'
+
 function AppShell(): React.JSX.Element {
   const [mode, setMode] = useState<Mode>('convert')
+  const [panel, setPanel] = useState<OverlayPanel>('none')
   const { isDragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop()
   const modeInfo = MODES.find((m) => m.id === mode)
 
@@ -28,7 +33,12 @@ function AppShell(): React.JSX.Element {
         } as React.CSSProperties
       }
     >
-      <Sidebar active={mode} onSelect={setMode} />
+      <Sidebar
+        active={mode}
+        onSelect={setMode}
+        onOpenHistory={() => setPanel('history')}
+        onOpenSettings={() => setPanel('settings')}
+      />
       <main className="flex-1 overflow-y-auto px-10 py-8">
         <Dropzone />
         <div key={mode} className="animate-[screen-fade-in_180ms_ease-out]">
@@ -45,6 +55,9 @@ function AppShell(): React.JSX.Element {
           </p>
         </div>
       )}
+
+      {panel === 'history' && <HistoryPanel onClose={() => setPanel('none')} />}
+      {panel === 'settings' && <SettingsPanel onClose={() => setPanel('none')} />}
     </div>
   )
 }

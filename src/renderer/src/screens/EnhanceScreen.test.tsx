@@ -36,6 +36,8 @@ describe('EnhanceScreen', () => {
     vi.mocked(window.api.enhancePreview).mockReset()
     vi.mocked(window.api.enhanceImage).mockReset()
     vi.mocked(window.api.saveFile).mockReset()
+    vi.mocked(window.api.getSettings).mockResolvedValue({ defaultDownloadDir: null })
+    vi.mocked(window.api.addHistoryEntry).mockReset().mockResolvedValue([])
   })
 
   afterEach(() => {
@@ -159,5 +161,51 @@ describe('EnhanceScreen', () => {
     })
 
     expect(window.api.enhanceImage).not.toHaveBeenCalled()
+  })
+
+  it('logs a history entry once the save succeeds', async () => {
+    vi.mocked(window.api.enhancePreview).mockResolvedValue({ ok: true, thumbnail: 'x' })
+    vi.mocked(window.api.saveFile).mockResolvedValue('C:\\images\\cat-mejorado.png')
+    vi.mocked(window.api.enhanceImage).mockResolvedValue({ ok: true })
+    renderWithFile()
+    await resolvePreview()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Guardar' }).click()
+    })
+
+    expect(window.api.addHistoryEntry).toHaveBeenCalledWith({
+      kind: 'enhance',
+      sourceName: 'cat.png',
+      destPath: 'C:\\images\\cat-mejorado.png'
+    })
+  })
+
+  it('does not log history when the save fails', async () => {
+    vi.mocked(window.api.enhancePreview).mockResolvedValue({ ok: true, thumbnail: 'x' })
+    vi.mocked(window.api.saveFile).mockResolvedValue('C:\\images\\cat-mejorado.png')
+    vi.mocked(window.api.enhanceImage).mockResolvedValue({ ok: false, error: 'boom' })
+    renderWithFile()
+    await resolvePreview()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Guardar' }).click()
+    })
+
+    expect(window.api.addHistoryEntry).not.toHaveBeenCalled()
+  })
+
+  it('opens the save dialog inside the configured default download folder', async () => {
+    vi.mocked(window.api.enhancePreview).mockResolvedValue({ ok: true, thumbnail: 'x' })
+    vi.mocked(window.api.getSettings).mockResolvedValue({ defaultDownloadDir: 'C:\\default' })
+    vi.mocked(window.api.saveFile).mockResolvedValue(null)
+    renderWithFile()
+    await resolvePreview()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Guardar' }).click()
+    })
+
+    expect(window.api.saveFile).toHaveBeenCalledWith('C:\\default/cat-mejorado.png')
   })
 })

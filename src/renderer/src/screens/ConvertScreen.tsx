@@ -56,7 +56,11 @@ function ConvertScreen(): React.JSX.Element {
   async function handleConvertAll(): Promise<void> {
     if (files.length === 0) return
 
-    const directory = await window.api.chooseDirectory()
+    // A configured default download folder skips the prompt entirely —
+    // that's the whole point of setting one for a batch operation. With
+    // none set, same "ask every time" as before.
+    const { defaultDownloadDir } = await window.api.getSettings()
+    const directory = defaultDownloadDir ?? (await window.api.chooseDirectory())
     if (!directory) return
 
     setIsConverting(true)
@@ -80,6 +84,10 @@ function ConvertScreen(): React.JSX.Element {
           ? { state: 'done', destPath }
           : { state: 'error', message: result.error }
       }))
+
+      if (result.ok) {
+        window.api.addHistoryEntry({ kind: 'convert', sourceName: file.name, destPath, format })
+      }
     }
 
     setIsConverting(false)

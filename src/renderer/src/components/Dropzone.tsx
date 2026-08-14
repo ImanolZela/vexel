@@ -1,10 +1,7 @@
 import { useFiles } from '../hooks/useFiles'
 import Button from './ui/Button'
 import { UploadIcon } from './icons'
-
-function fileNameFromPath(path: string): string {
-  return path.split(/[\\/]/).pop() ?? path
-}
+import { fileNameFromPath } from '../lib/path'
 
 function Dropzone(): React.JSX.Element {
   const { files, addFiles, removeFile } = useFiles()

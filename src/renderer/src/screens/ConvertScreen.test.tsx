@@ -32,6 +32,8 @@ describe('ConvertScreen', () => {
     vi.mocked(window.api.chooseDirectory).mockReset()
     vi.mocked(window.api.convertImage).mockReset()
     vi.mocked(window.api.joinPath).mockImplementation((...segments) => segments.join('\\'))
+    vi.mocked(window.api.getSettings).mockResolvedValue({ defaultDownloadDir: null })
+    vi.mocked(window.api.addHistoryEntry).mockReset().mockResolvedValue([])
   })
 
   it('shows a hint when no file is selected', () => {
@@ -139,5 +141,47 @@ describe('ConvertScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Convertir todo (1)' }))
 
     expect(window.api.convertImage).not.toHaveBeenCalled()
+  })
+
+  it('logs a history entry for each successful conversion', async () => {
+    vi.mocked(window.api.chooseDirectory).mockResolvedValue('C:\\out')
+    vi.mocked(window.api.convertImage).mockResolvedValue({ ok: true })
+    const user = userEvent.setup()
+    renderWithFiles([CAT])
+
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (1)' }))
+
+    expect(window.api.addHistoryEntry).toHaveBeenCalledWith({
+      kind: 'convert',
+      sourceName: 'cat.png',
+      destPath: 'C:\\out\\cat_vexel.png',
+      format: 'png'
+    })
+  })
+
+  it('does not log history for a file that failed to convert', async () => {
+    vi.mocked(window.api.chooseDirectory).mockResolvedValue('C:\\out')
+    vi.mocked(window.api.convertImage).mockResolvedValue({ ok: false, error: 'boom' })
+    const user = userEvent.setup()
+    renderWithFiles([CAT])
+
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (1)' }))
+    await screen.findByText('boom')
+
+    expect(window.api.addHistoryEntry).not.toHaveBeenCalled()
+  })
+
+  it('uses the configured default download folder without prompting', async () => {
+    vi.mocked(window.api.getSettings).mockResolvedValue({ defaultDownloadDir: 'C:\\default' })
+    vi.mocked(window.api.convertImage).mockResolvedValue({ ok: true })
+    const user = userEvent.setup()
+    renderWithFiles([CAT])
+
+    await user.click(screen.getByRole('button', { name: 'Convertir todo (1)' }))
+
+    expect(window.api.chooseDirectory).not.toHaveBeenCalled()
+    expect(window.api.convertImage).toHaveBeenCalledWith(
+      expect.objectContaining({ destPath: 'C:\\default\\cat_vexel.png' })
+    )
   })
 })

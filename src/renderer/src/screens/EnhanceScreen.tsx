@@ -82,7 +82,12 @@ function EnhanceScreen(): React.JSX.Element {
     if (!source) return
 
     setIsSaving(true)
-    const destPath = await window.api.saveFile(suggestedEnhancedFileName(source.name))
+    const { defaultDownloadDir } = await window.api.getSettings()
+    const suggestedName = suggestedEnhancedFileName(source.name)
+    const defaultPath = defaultDownloadDir
+      ? window.api.joinPath(defaultDownloadDir, suggestedName)
+      : suggestedName
+    const destPath = await window.api.saveFile(defaultPath)
     if (!destPath) {
       setIsSaving(false)
       return
@@ -92,6 +97,9 @@ function EnhanceScreen(): React.JSX.Element {
     setSaveStatus(
       result.ok ? { type: 'success', path: destPath } : { type: 'error', message: result.error }
     )
+    if (result.ok) {
+      window.api.addHistoryEntry({ kind: 'enhance', sourceName: source.name, destPath })
+    }
     setIsSaving(false)
   }
 

@@ -36,6 +36,8 @@ describe('VectorizeScreen', () => {
     vi.mocked(window.api.vectorizeImage).mockReset()
     vi.mocked(window.api.saveFile).mockReset()
     vi.mocked(window.api.writeTextFile).mockReset()
+    vi.mocked(window.api.getSettings).mockResolvedValue({ defaultDownloadDir: null })
+    vi.mocked(window.api.addHistoryEntry).mockReset().mockResolvedValue([])
   })
 
   afterEach(() => {
@@ -157,6 +159,53 @@ describe('VectorizeScreen', () => {
     })
 
     expect(window.api.writeTextFile).not.toHaveBeenCalled()
+  })
+
+  it('logs a history entry once the export succeeds', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    vi.mocked(window.api.saveFile).mockResolvedValue('C:\\images\\cat.svg')
+    vi.mocked(window.api.writeTextFile).mockResolvedValue({ ok: true })
+    renderWithFile()
+    await resolveVectorize()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Exportar SVG' }).click()
+    })
+
+    expect(window.api.addHistoryEntry).toHaveBeenCalledWith({
+      kind: 'vectorize',
+      sourceName: 'cat.png',
+      destPath: 'C:\\images\\cat.svg',
+      format: 'svg'
+    })
+  })
+
+  it('does not log history when the export fails', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    vi.mocked(window.api.saveFile).mockResolvedValue('C:\\images\\cat.svg')
+    vi.mocked(window.api.writeTextFile).mockResolvedValue({ ok: false, error: 'boom' })
+    renderWithFile()
+    await resolveVectorize()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Exportar SVG' }).click()
+    })
+
+    expect(window.api.addHistoryEntry).not.toHaveBeenCalled()
+  })
+
+  it('opens the save dialog inside the configured default download folder', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    vi.mocked(window.api.getSettings).mockResolvedValue({ defaultDownloadDir: 'C:\\default' })
+    vi.mocked(window.api.saveFile).mockResolvedValue(null)
+    renderWithFile()
+    await resolveVectorize()
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Exportar SVG' }).click()
+    })
+
+    expect(window.api.saveFile).toHaveBeenCalledWith('C:\\default/cat.svg')
   })
 })
 

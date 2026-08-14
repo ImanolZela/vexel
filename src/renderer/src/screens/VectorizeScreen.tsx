@@ -74,7 +74,15 @@ function VectorizeScreen(): React.JSX.Element {
     if (!source || !svg) return
 
     setIsExporting(true)
-    const path = await window.api.saveFile(suggestedSvgFileName(source.name))
+    // A configured default download folder just pre-fills where the save
+    // dialog opens — unlike Convertir's batch save, exporting one SVG still
+    // benefits from confirming/renaming the exact file each time.
+    const { defaultDownloadDir } = await window.api.getSettings()
+    const suggestedName = suggestedSvgFileName(source.name)
+    const defaultPath = defaultDownloadDir
+      ? window.api.joinPath(defaultDownloadDir, suggestedName)
+      : suggestedName
+    const path = await window.api.saveFile(defaultPath)
     if (!path) {
       setIsExporting(false)
       return
@@ -84,6 +92,14 @@ function VectorizeScreen(): React.JSX.Element {
     setExportStatus(
       result.ok ? { type: 'success', path } : { type: 'error', message: result.error }
     )
+    if (result.ok) {
+      window.api.addHistoryEntry({
+        kind: 'vectorize',
+        sourceName: source.name,
+        destPath: path,
+        format: 'svg'
+      })
+    }
     setIsExporting(false)
   }
 
