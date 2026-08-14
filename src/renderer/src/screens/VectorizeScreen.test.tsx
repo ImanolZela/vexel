@@ -6,11 +6,20 @@ import { FilesProvider } from '../state/FilesContext'
 import { useFiles } from '../hooks/useFiles'
 
 const CAT = { path: 'C:\\images\\cat.png', name: 'cat.png' }
+const DOG = { path: 'C:\\images\\dog.png', name: 'dog.png' }
 
 function SeedFile(): null {
   const { addFiles } = useFiles()
   useEffect(() => {
     addFiles([CAT])
+  }, [addFiles])
+  return null
+}
+
+function SeedTwoFiles(): null {
+  const { addFiles } = useFiles()
+  useEffect(() => {
+    addFiles([CAT, DOG])
   }, [addFiles])
   return null
 }
@@ -192,6 +201,30 @@ describe('VectorizeScreen', () => {
     })
 
     expect(window.api.addHistoryEntry).not.toHaveBeenCalled()
+  })
+
+  it('shows a file picker with multiple files and switches the active one', async () => {
+    vi.mocked(window.api.vectorizeImage).mockResolvedValue({ ok: true, svg: '<svg></svg>' })
+    render(
+      <FilesProvider>
+        <SeedTwoFiles />
+        <VectorizeScreen />
+      </FilesProvider>
+    )
+    await resolveVectorize()
+
+    expect(window.api.vectorizeImage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sourcePath: CAT.path })
+    )
+
+    await act(async () => {
+      screen.getByRole('button', { name: DOG.name }).click()
+    })
+    await resolveVectorize()
+
+    expect(window.api.vectorizeImage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sourcePath: DOG.path })
+    )
   })
 
   it('opens the save dialog inside the configured default download folder', async () => {

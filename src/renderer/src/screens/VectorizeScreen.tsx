@@ -5,6 +5,7 @@ import Slider from '../components/ui/Slider'
 import Checkbox from '../components/ui/Checkbox'
 import Card from '../components/ui/Card'
 import StatusMessage from '../components/ui/StatusMessage'
+import FilePicker from '../components/FilePicker'
 import { VectorizeIcon } from '../components/icons'
 import { suggestedSvgFileName } from '../lib/svgFileName'
 import { formatBytes } from '../lib/formatBytes'
@@ -32,7 +33,10 @@ function requestKey(
 
 function VectorizeScreen(): React.JSX.Element {
   const { files } = useFiles()
-  const source = files[0]
+  const [selectedPath, setSelectedPath] = useState<string | null>(null)
+  // Falls back to the first file automatically if the selected one was
+  // removed (or none was picked yet) — self-healing, no extra effect needed.
+  const source = files.find((file) => file.path === selectedPath) ?? files[0]
 
   const [colors, setColors] = useState(12)
   const [turdSize, setTurdSize] = useState(2)
@@ -114,6 +118,8 @@ function VectorizeScreen(): React.JSX.Element {
       <p className="mb-6 text-text-secondary">
         Convertí tus imágenes raster en paths vectoriales reales.
       </p>
+
+      {source && <FilePicker files={files} selectedPath={source.path} onSelect={setSelectedPath} />}
 
       {!source && (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-text-secondary/20 py-10 text-center">

@@ -6,6 +6,7 @@ import Slider from '../components/ui/Slider'
 import Checkbox from '../components/ui/Checkbox'
 import Card from '../components/ui/Card'
 import StatusMessage from '../components/ui/StatusMessage'
+import FilePicker from '../components/FilePicker'
 import { EnhanceIcon } from '../components/icons'
 import { suggestedEnhancedFileName } from '../lib/enhancedFileName'
 import { ENHANCE_PRESETS } from '../lib/enhancePresets'
@@ -44,7 +45,8 @@ function isActivePreset(options: EnhanceOptionsState, presetOptions: EnhanceOpti
 
 function EnhanceScreen(): React.JSX.Element {
   const { files } = useFiles()
-  const source = files[0]
+  const [selectedPath, setSelectedPath] = useState<string | null>(null)
+  const source = files.find((file) => file.path === selectedPath) ?? files[0]
 
   const [options, setOptions] = useState<EnhanceOptionsState>({
     autoContrast: false,
@@ -114,6 +116,8 @@ function EnhanceScreen(): React.JSX.Element {
       <p className="mb-6 text-text-secondary">
         Nitidez, reducción de ruido, auto-contraste y upscale sin depender de la nube.
       </p>
+
+      {source && <FilePicker files={files} selectedPath={source.path} onSelect={setSelectedPath} />}
 
       {!source && (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-text-secondary/20 py-10 text-center">
