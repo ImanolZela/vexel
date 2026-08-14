@@ -1,5 +1,6 @@
 import sharp from 'sharp'
 import { createThumbnail } from './thumbnail'
+import { applyFormatEncoding, formatFromExtension } from './encode'
 
 export interface EnhanceOptions {
   autoContrast?: boolean
@@ -45,6 +46,15 @@ export async function enhanceImage(
   options: EnhanceOptions
 ): Promise<void> {
   const pipeline = await buildPipeline(sourcePath, options)
+
+  // Save dialogs let the user type any extension, so this can differ from
+  // the source format. Same tuned encoding as Convertir either way — an
+  // unrecognized extension just falls back to sharp's own inference.
+  const format = formatFromExtension(destPath)
+  if (format) {
+    applyFormatEncoding(pipeline, format)
+  }
+
   await pipeline.toFile(destPath)
 }
 

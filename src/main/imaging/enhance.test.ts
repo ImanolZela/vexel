@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -89,6 +89,54 @@ describe('enhanceImage', () => {
     const { data } = await sharp(destPath).raw().toBuffer({ resolveWithObject: true })
     expect(data[0]).toBeLessThan(30)
     expect(data[(width - 1) * channels]).toBeGreaterThan(225)
+  })
+
+  it('saves png losslessly, same as convertImage', async () => {
+    const width = 24
+    const height = 24
+    const channels = 3
+    const raw = Buffer.alloc(width * height * channels)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const offset = (y * width + x) * channels
+        raw[offset] = (x * 7 + y * 13) % 256
+        raw[offset + 1] = (x * 3 + y * 29) % 256
+        raw[offset + 2] = (x * 17 + y * 5) % 256
+      }
+    }
+    const sourcePath = join(dir, 'noisy.png')
+    const destPath = join(dir, 'out.png')
+    await sharp(raw, { raw: { width, height, channels } }).png().toFile(sourcePath)
+    const sourcePixels = await sharp(sourcePath).raw().toBuffer()
+
+    await enhanceImage(sourcePath, destPath, {})
+
+    const destPixels = await sharp(destPath).raw().toBuffer()
+    expect(destPixels.equals(sourcePixels)).toBe(true)
+  })
+
+  it('encodes a webp save at the same tuned compression effort as convertImage', async () => {
+    const width = 64
+    const height = 64
+    const channels = 3
+    const raw = Buffer.alloc(width * height * channels)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const offset = (y * width + x) * channels
+        raw[offset] = (x * 7 + y * 13) % 256
+        raw[offset + 1] = (x * 3 + y * 29) % 256
+        raw[offset + 2] = (x * 17 + y * 5) % 256
+      }
+    }
+    const sourcePath = join(dir, 'noisy.png')
+    const destPath = join(dir, 'out.webp')
+    await sharp(raw, { raw: { width, height, channels } }).png().toFile(sourcePath)
+
+    await enhanceImage(sourcePath, destPath, {})
+    const tunedSize = (await stat(destPath)).size
+
+    const defaultEffortBuffer = await sharp(sourcePath).webp({ effort: 4 }).toBuffer()
+    expect(tunedSize).toBeLessThanOrEqual(defaultEffortBuffer.length)
   })
 })
 
